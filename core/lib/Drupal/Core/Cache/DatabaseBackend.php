@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Cache\DatabaseBackend.
- */
-
 namespace Drupal\Core\Cache;
 
 use Drupal\Component\Utility\Crypt;
@@ -61,7 +56,7 @@ class DatabaseBackend implements CacheBackendInterface {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::get().
+   * {@inheritdoc}
    */
   public function get($cid, $allow_invalid = FALSE) {
     $cids = array($cid);
@@ -70,7 +65,7 @@ class DatabaseBackend implements CacheBackendInterface {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::getMultiple().
+   * {@inheritdoc}
    */
   public function getMultiple(&$cids, $allow_invalid = FALSE) {
     $cid_mapping = array();
@@ -240,14 +235,14 @@ class DatabaseBackend implements CacheBackendInterface {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::delete().
+   * {@inheritdoc}
    */
   public function delete($cid) {
     $this->deleteMultiple(array($cid));
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::deleteMultiple().
+   * {@inheritdoc}
    */
   public function deleteMultiple(array $cids) {
     $cids = array_values(array_map(array($this, 'normalizeCid'), $cids));
@@ -270,7 +265,7 @@ class DatabaseBackend implements CacheBackendInterface {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::deleteAll().
+   * {@inheritdoc}
    */
   public function deleteAll() {
     try {
@@ -287,14 +282,14 @@ class DatabaseBackend implements CacheBackendInterface {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::invalidate().
+   * {@inheritdoc}
    */
   public function invalidate($cid) {
     $this->invalidateMultiple(array($cid));
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::invalidateMultiple().
+   * {@inheritdoc}
    */
   public function invalidateMultiple(array $cids) {
     $cids = array_values(array_map(array($this, 'normalizeCid'), $cids));
@@ -313,7 +308,7 @@ class DatabaseBackend implements CacheBackendInterface {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::invalidateAll().
+   * {@inheritdoc}
    */
   public function invalidateAll() {
     try {
@@ -327,7 +322,7 @@ class DatabaseBackend implements CacheBackendInterface {
   }
 
   /**
-   * Implements Drupal\Core\Cache\CacheBackendInterface::garbageCollection().
+   * {@inheritdoc}
    */
   public function garbageCollection() {
     try {
@@ -482,4 +477,5 @@ class DatabaseBackend implements CacheBackendInterface {
     );
     return $schema;
   }
+
 }

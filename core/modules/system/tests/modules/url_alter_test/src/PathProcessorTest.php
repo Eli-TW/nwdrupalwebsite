@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\url_alter_test\PathProcessorTest.
- */
-
 namespace Drupal\url_alter_test;
 
 use Drupal\Core\PathProcessor\InboundPathProcessorInterface;
@@ -19,7 +14,7 @@ use Drupal\user\Entity\User;
 class PathProcessorTest implements InboundPathProcessorInterface, OutboundPathProcessorInterface {
 
   /**
-   * Implements Drupal\Core\PathProcessor\InboundPathProcessorInterface::processInbound().
+   * {@inheritdoc}
    */
   public function processInbound($path, Request $request) {
     // Rewrite user/username to user/uid.
@@ -40,7 +35,7 @@ class PathProcessorTest implements InboundPathProcessorInterface, OutboundPathPr
   }
 
   /**
-   * Implements Drupal\Core\PathProcessor\OutboundPathProcessorInterface::processOutbound().
+   * {@inheritdoc}
    */
   public function processOutbound($path, &$options = array(), Request $request = NULL, BubbleableMetadata $bubbleable_metadata = NULL) {
     // Rewrite user/uid to user/username.

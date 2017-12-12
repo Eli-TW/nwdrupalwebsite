@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\Plugin\views\wizard\NodeRevision.
- */
-
 namespace Drupal\node\Plugin\views\wizard;
 
 use Drupal\views\Plugin\views\wizard\WizardPluginBase;
@@ -56,7 +51,7 @@ class NodeRevision extends WizardPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\wizard\WizardPluginBase::defaultDisplayOptions().
+   * {@inheritdoc}
    */
   protected function defaultDisplayOptions() {
     $display_options = parent::defaultDisplayOptions();

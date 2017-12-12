@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\language\Tests\LanguageSwitchingTest.
- */
-
 namespace Drupal\language\Tests;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -30,7 +25,7 @@ class LanguageSwitchingTest extends WebTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Create and login user.
+    // Create and log in user.
     $admin_user = $this->drupalCreateUser(array('administer blocks', 'administer languages', 'access administration pages'));
     $this->drupalLogin($admin_user);
   }
@@ -394,9 +389,9 @@ class LanguageSwitchingTest extends WebTestBase {
   }
 
   /**
-   * Test language switcher links for session based negotiation.
+   * Tests language switcher links for session based negotiation.
    */
-  function testLanguageSessionSwitchLinks() {
+  public function testLanguageSessionSwitchLinks() {
     // Add language.
     $edit = array(
       'predefined_langcode' => 'fr',

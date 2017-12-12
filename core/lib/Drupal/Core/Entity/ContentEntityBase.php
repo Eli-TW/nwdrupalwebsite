@@ -1,17 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\ContentEntityBase.
- */
-
 namespace Drupal\Core\Entity;
 
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\TypedDataInterface;
 
 /**
@@ -166,7 +163,7 @@ abstract class ContentEntityBase extends Entity implements \IteratorAggregate, C
   protected $validationRequired = FALSE;
 
   /**
-   * Overrides Entity::__construct().
+   * {@inheritdoc}
    */
   public function __construct(array $values, $entity_type, $bundle = FALSE, $translations = array()) {
     $this->entityTypeId = $entity_type;
@@ -811,6 +808,13 @@ abstract class ContentEntityBase extends Entity implements \IteratorAggregate, C
   /**
    * {@inheritdoc}
    */
+  public function isNewTranslation() {
+    return $this->translations[$this->activeLangcode]['status'] == static::TRANSLATION_CREATED;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function addTranslation($langcode, array $values = array()) {
     // Make sure we do not attempt to create a translation if an invalid
     // language is specified or the entity cannot be translated.
@@ -822,37 +826,11 @@ abstract class ContentEntityBase extends Entity implements \IteratorAggregate, C
       throw new \InvalidArgumentException("The entity cannot be translated since it is language neutral ({$this->defaultLangcode}).");
     }
 
-    // Instantiate a new empty entity so default values will be populated in the
-    // specified language.
-    $entity_type = $this->getEntityType();
-
-    $default_values = array(
-      $entity_type->getKey('bundle') => $this->bundle(),
-      $this->langcodeKey => $langcode,
-    );
-    $entity = $this->entityManager()
-      ->getStorage($this->getEntityTypeId())
-      ->create($default_values);
-
-    foreach ($entity as $name => $field) {
-      if (!isset($values[$name]) && !$field->isEmpty()) {
-        $values[$name] = $field->getValue();
-      }
-    }
-    $values[$this->langcodeKey] = $langcode;
-    $values[$this->defaultLangcodeKey] = FALSE;
-
+    // Initialize the translation object.
+    /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
+    $storage = $this->entityManager()->getStorage($this->getEntityTypeId());
     $this->translations[$langcode]['status'] = static::TRANSLATION_CREATED;
-    $translation = $this->getTranslation($langcode);
-    $definitions = $translation->getFieldDefinitions();
-
-    foreach ($values as $name => $value) {
-      if (isset($definitions[$name]) && $definitions[$name]->isTranslatable()) {
-        $translation->values[$name][$langcode] = $value;
-      }
-    }
-
-    return $translation;
+    return $storage->createTranslation($this, $langcode, $values);
   }
 
   /**
@@ -998,7 +976,7 @@ abstract class ContentEntityBase extends Entity implements \IteratorAggregate, C
   }
 
   /**
-   * Overrides Entity::createDuplicate().
+   * {@inheritdoc}
    */
   public function createDuplicate() {
     if ($this->translations[$this->activeLangcode]['status'] == static::TRANSLATION_REMOVED) {
@@ -1131,6 +1109,64 @@ abstract class ContentEntityBase extends Entity implements \IteratorAggregate, C
       $this->entityKeys[$key] = $value;
     }
     return $value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
+    $fields = [];
+    if ($entity_type->hasKey('id')) {
+      $fields[$entity_type->getKey('id')] = BaseFieldDefinition::create('integer')
+        ->setLabel(new TranslatableMarkup('ID'))
+        ->setReadOnly(TRUE)
+        ->setSetting('unsigned', TRUE);
+    }
+    if ($entity_type->hasKey('uuid')) {
+      $fields[$entity_type->getKey('uuid')] = BaseFieldDefinition::create('uuid')
+        ->setLabel(new TranslatableMarkup('UUID'))
+        ->setReadOnly(TRUE);
+    }
+    if ($entity_type->hasKey('revision')) {
+      $fields[$entity_type->getKey('revision')] = BaseFieldDefinition::create('integer')
+        ->setLabel(new TranslatableMarkup('Revision ID'))
+        ->setReadOnly(TRUE)
+        ->setSetting('unsigned', TRUE);
+    }
+    if ($entity_type->hasKey('langcode')) {
+      $fields[$entity_type->getKey('langcode')] = BaseFieldDefinition::create('language')
+        ->setLabel(new TranslatableMarkup('Language'))
+        ->setDisplayOptions('view', [
+          'type' => 'hidden',
+        ])
+        ->setDisplayOptions('form', [
+          'type' => 'language_select',
+          'weight' => 2,
+        ]);
+      if ($entity_type->isRevisionable()) {
+        $fields[$entity_type->getKey('langcode')]->setRevisionable(TRUE);
+      }
+      if ($entity_type->isTranslatable()) {
+        $fields[$entity_type->getKey('langcode')]->setTranslatable(TRUE);
+      }
+    }
+    if ($entity_type->hasKey('bundle')) {
+      if ($bundle_entity_type_id = $entity_type->getBundleEntityType()) {
+        $fields[$entity_type->getKey('bundle')] = BaseFieldDefinition::create('entity_reference')
+          ->setLabel($entity_type->getBundleLabel())
+          ->setSetting('target_type', $bundle_entity_type_id)
+          ->setRequired(TRUE)
+          ->setReadOnly(TRUE);
+      }
+      else {
+        $fields[$entity_type->getKey('bundle')] = BaseFieldDefinition::create('string')
+          ->setLabel($entity_type->getBundleLabel())
+          ->setRequired(TRUE)
+          ->setReadOnly(TRUE);
+      }
+    }
+
+    return $fields;
   }
 
   /**

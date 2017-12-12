@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Extension\Extension.
- */
-
 namespace Drupal\Core\Extension;
 
 /**
@@ -185,7 +180,7 @@ class Extension implements \Serializable {
   }
 
   /**
-   * Implements Serializable::unserialize().
+   * {@inheritdoc}
    */
   public function unserialize($data) {
     $data = unserialize($data);

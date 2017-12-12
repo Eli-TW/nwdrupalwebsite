@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\StreamWrapper\LocalStream.
- */
-
 namespace Drupal\Core\StreamWrapper;
 
 /**
@@ -60,14 +55,14 @@ abstract class LocalStream implements StreamWrapperInterface {
   abstract function getDirectoryPath();
 
   /**
-   * Implements Drupal\Core\StreamWrapper\StreamWrapperInterface::setUri().
+   * {@inheritdoc}
    */
   function setUri($uri) {
     $this->uri = $uri;
   }
 
   /**
-   * Implements Drupal\Core\StreamWrapper\StreamWrapperInterface::getUri().
+   * {@inheritdoc}
    */
   function getUri() {
     return $this->uri;
@@ -101,7 +96,7 @@ abstract class LocalStream implements StreamWrapperInterface {
   }
 
   /**
-   * Implements Drupal\Core\StreamWrapper\StreamWrapperInterface::realpath().
+   * {@inheritdoc}
    */
   function realpath() {
     return $this->getLocalPath();
@@ -572,4 +567,5 @@ abstract class LocalStream implements StreamWrapperInterface {
     // have a return value.
     return TRUE;
   }
+
 }

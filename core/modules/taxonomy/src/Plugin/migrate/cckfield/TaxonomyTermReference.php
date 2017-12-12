@@ -1,17 +1,18 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\Plugin\migrate\cckfield\TaxonomyTermReference.
- */
-
 namespace Drupal\taxonomy\Plugin\migrate\cckfield;
 
-use Drupal\migrate\Entity\MigrationInterface;
+use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate_drupal\Plugin\migrate\cckfield\CckFieldPluginBase;
 
 /**
- * @PluginID("taxonomy_term_reference")
+ * @MigrateCckField(
+ *   id = "taxonomy_term_reference",
+ *   type_map = {
+ *     "taxonomy_term_reference" = "entity_reference"
+ *   },
+ *   core = {6,7}
+ * )
  */
 class TaxonomyTermReference extends CckFieldPluginBase {
 

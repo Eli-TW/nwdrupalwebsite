@@ -1,20 +1,16 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Plugin\DefaultPluginManager.
- */
-
 namespace Drupal\Core\Plugin;
 
 use Drupal\Component\Plugin\Discovery\CachedDiscoveryInterface;
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Cache\UseCacheBackendTrait;
 use Drupal\Component\Plugin\Discovery\DiscoveryCachedTrait;
 use Drupal\Core\Plugin\Discovery\ContainerDerivativeDiscoveryDecorator;
 use Drupal\Component\Plugin\PluginManagerBase;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\Discovery\AnnotatedClassDiscovery;
 use Drupal\Core\Plugin\Factory\ContainerFactory;
@@ -27,13 +23,7 @@ use Drupal\Core\Plugin\Factory\ContainerFactory;
 class DefaultPluginManager extends PluginManagerBase implements PluginManagerInterface, CachedDiscoveryInterface {
 
   use DiscoveryCachedTrait;
-
-  /**
-   * Cache backend instance.
-   *
-   * @var \Drupal\Core\Cache\CacheBackendInterface
-   */
-  protected $cacheBackend;
+  use UseCacheBackendTrait;
 
   /**
    * The cache key.
@@ -47,7 +37,7 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    *
    * @var array
    */
-  protected $cacheTags = array();
+  protected $cacheTags = [];
 
   /**
    * Name of the alter hook if one should be invoked.
@@ -78,14 +68,7 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    *
    * @var array
    */
-  protected $defaults = array();
-
-  /**
-   * Flag whether persistent caches should be used.
-   *
-   * @var bool
-   */
-  protected $useCaches = TRUE;
+  protected $defaults = [];
 
   /**
    * The name of the annotation that contains the plugin definition.
@@ -110,6 +93,14 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
   protected $namespaces;
 
   /**
+   * Additional namespaces the annotation discovery mechanism should scan for
+   * annotation definitions.
+   *
+   * @var string[]
+   */
+  protected $additionalAnnotationNamespaces = [];
+
+  /**
    * Creates the discovery object.
    *
    * @param string|bool $subdir
@@ -124,13 +115,16 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    * @param string $plugin_definition_annotation_name
    *   (optional) The name of the annotation that contains the plugin definition.
    *   Defaults to 'Drupal\Component\Annotation\Plugin'.
+   * @param string[] $additional_annotation_namespaces
+   *   (optional) Additional namespaces to scan for annotation definitions.
    */
-  public function __construct($subdir, \Traversable $namespaces, ModuleHandlerInterface $module_handler, $plugin_interface = NULL, $plugin_definition_annotation_name = 'Drupal\Component\Annotation\Plugin') {
+  public function __construct($subdir, \Traversable $namespaces, ModuleHandlerInterface $module_handler, $plugin_interface = NULL, $plugin_definition_annotation_name = 'Drupal\Component\Annotation\Plugin', array $additional_annotation_namespaces = []) {
     $this->subdir = $subdir;
     $this->namespaces = $namespaces;
     $this->pluginDefinitionAnnotationName = $plugin_definition_annotation_name;
     $this->pluginInterface = $plugin_interface;
     $this->moduleHandler = $module_handler;
+    $this->additionalAnnotationNamespaces = $additional_annotation_namespaces;
   }
 
   /**
@@ -237,30 +231,6 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
   }
 
   /**
-   * Fetches from the cache backend, respecting the use caches flag.
-   *
-   * @see \Drupal\Core\Cache\CacheBackendInterface::get()
-   */
-  protected function cacheGet($cid) {
-    if ($this->useCaches && $this->cacheBackend) {
-      return $this->cacheBackend->get($cid);
-    }
-    return FALSE;
-  }
-
-  /**
-   * Stores data in the persistent cache, respecting the use caches flag.
-   *
-   * @see \Drupal\Core\Cache\CacheBackendInterface::set()
-   */
-  protected function cacheSet($cid, $data, $expire = Cache::PERMANENT, array $tags = array()) {
-    if ($this->cacheBackend && $this->useCaches) {
-      $this->cacheBackend->set($cid, $data, $expire, $tags);
-    }
-  }
-
-
-  /**
    * Performs extra processing on plugin definitions.
    *
    * By default we add defaults for the type to the definition. If a type has
@@ -278,7 +248,7 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    */
   protected function getDiscovery() {
     if (!$this->discovery) {
-      $discovery = new AnnotatedClassDiscovery($this->subdir, $this->namespaces, $this->pluginDefinitionAnnotationName);
+      $discovery = new AnnotatedClassDiscovery($this->subdir, $this->namespaces, $this->pluginDefinitionAnnotationName, $this->additionalAnnotationNamespaces);
       $this->discovery = new ContainerDerivativeDiscoveryDecorator($discovery);
     }
     return $this->discovery;
@@ -325,7 +295,7 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    * Invokes the hook to alter the definitions if the alter hook is set.
    *
    * @param $definitions
-   *   The discovered plugin defintions.
+   *   The discovered plugin definitions.
    */
   protected function alterDefinitions(&$definitions) {
     if ($this->alterHook) {

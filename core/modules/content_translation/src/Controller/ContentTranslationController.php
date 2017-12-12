@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\content_translation\Controller\ContentTranslationController.
- */
-
 namespace Drupal\content_translation\Controller;
 
 use Drupal\content_translation\ContentTranslationManagerInterface;
@@ -82,8 +77,8 @@ class ContentTranslationController extends ControllerBase {
    *   The route match.
    * @param string $entity_type_id
    *   (optional) The entity type ID.
-   * @return array Array of page elements to render.
-   * Array of page elements to render.
+   * @return array
+   *   Array of page elements to render.
    */
   public function overview(RouteMatchInterface $route_match, $entity_type_id = NULL) {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
@@ -127,7 +122,7 @@ class ContentTranslationController extends ControllerBase {
         $langcode = $language->getId();
 
         $add_url = new Url(
-          'content_translation.translation_add_' . $entity_type_id,
+          "entity.$entity_type_id.content_translation_add",
           array(
             'source' => $original,
             'target' => $language->getId(),
@@ -138,7 +133,7 @@ class ContentTranslationController extends ControllerBase {
           )
         );
         $edit_url = new Url(
-          'content_translation.translation_edit_' . $entity_type_id,
+          "entity.$entity_type_id.content_translation_edit",
           array(
             'language' => $language->getId(),
             $entity_type_id => $entity->id(),
@@ -148,7 +143,7 @@ class ContentTranslationController extends ControllerBase {
           )
         );
         $delete_url = new Url(
-          'content_translation.translation_delete_' . $entity_type_id,
+          "entity.$entity_type_id.content_translation_delete",
           array(
             'language' => $language->getId(),
             $entity_type_id => $entity->id(),

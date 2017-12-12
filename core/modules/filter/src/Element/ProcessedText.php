@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\filter\Element\ProcessedText.
- */
-
 namespace Drupal\filter\Element;
 
 use Drupal\Core\Cache\Cache;
@@ -138,7 +133,11 @@ class ProcessedText extends RenderElement {
   /**
    * Wraps a logger channel.
    *
+   * @param string $channel
+   *   The name of the channel.
+   *
    * @return \Psr\Log\LoggerInterface
+   *   The logger for this channel.
    */
   protected static function logger($channel) {
     return \Drupal::logger($channel);

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Tests\Plugin\StyleGridTest.
- */
-
 namespace Drupal\views\Tests\Plugin;
 
 use Drupal\views\Views;
@@ -53,7 +48,7 @@ class StyleGridTest extends PluginTestBase {
 
     // Ensure styles are properly added for grid views.
     $this->drupalGet('test-grid');
-    $this->assertRaw('views/css/views.module.css');
+    $this->assertRaw('stable/css/views/views.module.css');
   }
 
   /**

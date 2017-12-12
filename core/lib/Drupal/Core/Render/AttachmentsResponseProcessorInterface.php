@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\Core\Render\AttachmentsResponseProcessorInterface.
- */
 
 namespace Drupal\Core\Render;
 
@@ -46,7 +42,8 @@ interface AttachmentsResponseProcessorInterface {
    *   The response to process.
    *
    * @return \Drupal\Core\Render\AttachmentsInterface
-   *   The processed response.
+   *   The processed response, with the attachments updated to reflect their
+   *   final values.
    *
    * @throws \InvalidArgumentException
    *   Thrown when the $response parameter is not the type of response object

@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\composer_manager\Unit\ExtensionDiscoveryTest.
- */
-
 namespace Drupal\Tests\composer_manager\Unit;
 
-use Drupal\Component\FileCache\FileCacheFactory;
 use Drupal\composer_manager\ExtensionDiscovery;
 use Drupal\Tests\UnitTestCase;
 use org\bovigo\vfs\vfsStream;
@@ -70,7 +64,7 @@ class ExtensionDiscoveryTest extends UnitTestCase {
         ],
       ],
     ];
-    $root = vfsStream::setup('drupal', null, $structure);
+    vfsStream::setup('drupal', null, $structure);
 
     $this->discovery = new ExtensionDiscovery('vfs://drupal');
   }

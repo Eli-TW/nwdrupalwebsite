@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\composer_manager\ExtensionDiscovery.
- */
-
 namespace Drupal\composer_manager;
 
 use Drupal\Core\Extension\ExtensionDiscovery as BaseExtensionDiscovery;
@@ -20,7 +15,7 @@ class ExtensionDiscovery extends BaseExtensionDiscovery {
    * Compared to the parent method:
    * - doesn't scan core/ because composer_manager doesn't need to care about
    *   core extensions (core already ships with their dependencies).
-   * - scans all sites (to accomodate the poor souls still using multisite).
+   * - scans all sites (to accommodate the poor souls still using multisite).
    */
   public function scan($type, $include_tests = NULL) {
     $searchdirs[static::ORIGIN_SITES_ALL] = 'sites/all';

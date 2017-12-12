@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Database\Schema.
- */
-
 namespace Drupal\Core\Database;
 
 use Drupal\Core\Database\Query\Condition;
@@ -56,14 +51,14 @@ abstract class Schema implements PlaceholderInterface {
   }
 
   /**
-   * Implements PlaceHolderInterface::uniqueIdentifier().
+   * {@inheritdoc}
    */
   public function uniqueIdentifier() {
     return $this->uniqueIdentifier;
   }
 
   /**
-   * Implements PlaceHolderInterface::nextPlaceholder().
+   * {@inheritdoc}
    */
   public function nextPlaceholder() {
     return $this->placeholder++;
@@ -660,4 +655,5 @@ abstract class Schema implements PlaceholderInterface {
     }
     return is_string($value) ? $this->connection->quote($value) : $value;
   }
+
 }

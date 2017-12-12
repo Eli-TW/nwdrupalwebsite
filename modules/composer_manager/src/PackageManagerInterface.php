@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\composer_manager\PackageManagerInterface.
- */
-
 namespace Drupal\composer_manager;
 
 /**
@@ -32,6 +27,14 @@ interface PackageManagerInterface {
    * @see \Drupal\Core\Extension\ExtensionDiscovery
    */
   public function getExtensionPackages();
+
+  /**
+   * Returns the installed packages.
+   *
+   * @return array
+   *   The installed packages, loaded from vendor/composer/installed.json.
+   */
+  public function getInstalledPackages();
 
   /**
    * Returns the required packages.

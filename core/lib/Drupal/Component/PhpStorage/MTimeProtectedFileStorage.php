@@ -1,9 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Component\PhpStorage\MTimeProtectedFileStorage.
- */
 namespace Drupal\Component\PhpStorage;
 
 /**
@@ -36,7 +32,7 @@ namespace Drupal\Component\PhpStorage;
 class MTimeProtectedFileStorage extends MTimeProtectedFastFileStorage {
 
   /**
-   * Implements Drupal\Component\PhpStorage\PhpStorageInterface::load().
+   * {@inheritdoc}
    */
   public function load($name) {
     if (($filename = $this->checkFile($name)) !== FALSE) {
@@ -47,7 +43,7 @@ class MTimeProtectedFileStorage extends MTimeProtectedFastFileStorage {
   }
 
   /**
-   * Implements Drupal\Component\PhpStorage\PhpStorageInterface::exists().
+   * {@inheritdoc}
    */
   public function exists($name) {
     return $this->checkFile($name) !== FALSE;

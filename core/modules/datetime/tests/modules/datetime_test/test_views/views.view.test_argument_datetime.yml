@@ -27,7 +27,7 @@ display:
           field: nid
           id: nid
           relationship: none
-          table: node
+          table: node_field_data
           plugin_id: numeric
       pager:
         options:
@@ -39,7 +39,7 @@ display:
           id: nid
           order: ASC
           relationship: none
-          table: node
+          table: node_field_data
           plugin_id: numeric
     display_plugin: default
     display_title: Master
@@ -95,5 +95,47 @@ display:
           plugin_id: datetime_day
     display_plugin: embed
     id: embed_2
+    display_title: ''
+    position: null
+  embed_4:
+    display_options:
+      defaults:
+        arguments: false
+      arguments:
+        field_date_value_day:
+          field: field_date_value_week
+          id: field_date_value
+          table: node__field_date
+          plugin_id: datetime_week
+    display_plugin: embed
+    id: embed_4
+    display_title: ''
+    position: null
+  embed_5:
+    display_options:
+      defaults:
+        arguments: false
+      arguments:
+        field_date_value_day:
+          field: field_date_value_full_date
+          id: field_date_value
+          table: node__field_date
+          plugin_id: datetime_full_date
+    display_plugin: embed
+    id: embed_5
+    display_title: ''
+    position: null
+  embed_6:
+    display_options:
+      defaults:
+        arguments: false
+      arguments:
+        field_date_value_day:
+          field: field_date_value_year_month
+          id: field_date_value
+          table: node__field_date
+          plugin_id: datetime_year_month
+    display_plugin: embed
+    id: embed_6
     display_title: ''
     position: null

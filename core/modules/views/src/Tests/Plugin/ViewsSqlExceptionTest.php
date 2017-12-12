@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Tests\Plugin\ViewsSqlExceptionTest.
- */
-
 namespace Drupal\views\Tests\Plugin;
 
 use Drupal\views\Views;
@@ -34,7 +29,7 @@ class ViewsSqlExceptionTest extends PluginTestBase {
   }
 
   /**
-   * Overrides Drupal\views\Tests\ViewTestBase::viewsData().
+   * {@inheritdoc}
    */
   protected function viewsData() {
     $data = parent::viewsData();

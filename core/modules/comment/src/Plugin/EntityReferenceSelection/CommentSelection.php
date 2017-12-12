@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\Plugin\EntityReferenceSelection\CommentSelection.
- */
-
 namespace Drupal\comment\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Database\Query\SelectInterface;
@@ -37,6 +32,34 @@ class CommentSelection extends DefaultSelection {
       $query->condition('status', CommentInterface::PUBLISHED);
     }
     return $query;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createNewEntity($entity_type_id, $bundle, $label, $uid) {
+    $comment = parent::createNewEntity($entity_type_id, $bundle, $label, $uid);
+
+    // In order to create a referenceable comment, it needs to published.
+    /** @var \Drupal\comment\CommentInterface $comment */
+    $comment->setPublished(TRUE);
+
+    return $comment;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateReferenceableNewEntities(array $entities) {
+    $entities = parent::validateReferenceableNewEntities($entities);
+    // Mirror the conditions checked in buildEntityQuery().
+    if (!$this->currentUser->hasPermission('administer comments')) {
+      $entities = array_filter($entities, function ($comment) {
+        /** @var \Drupal\comment\CommentInterface $comment */
+        return $comment->isPublished();
+      });
+    }
+    return $entities;
   }
 
   /**

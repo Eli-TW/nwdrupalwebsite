@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\ViewPreviewForm.
- */
-
 namespace Drupal\views_ui;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -94,6 +89,7 @@ class ViewPreviewForm extends ViewFormBase {
           'event' => 'click',
           'progress' => array('type' => 'fullscreen'),
           'method' => 'replaceWith',
+          'disable-refocus' => TRUE,
         ),
       ),
     );

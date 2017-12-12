@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\migrate\Row.
- */
-
 namespace Drupal\migrate;
 
 use Drupal\Component\Utility\NestedArray;
@@ -73,7 +68,7 @@ class Row {
    *
    * @see getRawDestination()
    */
-  protected $rawDestination;
+  protected $rawDestination = [];
 
   /**
    * TRUE when this row is a stub.
@@ -223,6 +218,17 @@ class Row {
   }
 
   /**
+   * Removes destination property.
+   *
+   * @param string $property
+   *   The name of the destination property.
+   */
+  public function removeDestinationProperty($property) {
+    unset($this->rawDestination[$property]);
+    NestedArray::unsetValue($this->destination, explode(static::PROPERTY_SEPARATOR, $property));
+  }
+
+  /**
    * Returns the whole destination array.
    *
    * @return array
@@ -329,4 +335,5 @@ class Row {
   public function isStub() {
     return $this->isStub;
   }
+
 }

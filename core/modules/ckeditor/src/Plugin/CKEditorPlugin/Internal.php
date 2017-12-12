@@ -1,14 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ckeditor\Plugin\CKEditorPlugin\Internal.
- */
-
 namespace Drupal\ckeditor\Plugin\CKEditorPlugin;
 
 use Drupal\ckeditor\CKEditorPluginBase;
-use Drupal\Component\Utility\NestedArray;
+use Drupal\ckeditor\CKEditorPluginContextualInterface;
+use Drupal\ckeditor\CKEditorPluginManager;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -24,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   label = @Translation("CKEditor core")
  * )
  */
-class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInterface {
+class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInterface, CKEditorPluginContextualInterface {
 
   /**
    * The cache backend.
@@ -75,14 +71,23 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
   }
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginInterface::isInternal().
+   * {@inheritdoc}
    */
   public function isInternal() {
     return TRUE;
   }
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginInterface::getFile().
+   * {@inheritdoc}
+   */
+  public function isEnabled(Editor $editor) {
+    // This plugin represents the core CKEditor plugins. They're always enabled:
+    // its configuration is always necessary.
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getFile() {
     // This plugin is already part of Drupal core's CKEditor build.
@@ -90,7 +95,7 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
   }
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginInterface::getConfig().
+   * {@inheritdoc}
    */
   public function getConfig(Editor $editor) {
     // Reasonable defaults that provide expected basic behavior.
@@ -100,6 +105,7 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
       'resize_dir' => 'vertical',
       'justifyClasses' => array('text-align-left', 'text-align-center', 'text-align-right', 'text-align-justify'),
       'entities' => FALSE,
+      'disableNativeSpellChecker' => FALSE,
     );
 
     // Add the allowedContent setting, which ensures CKEditor only allows tags
@@ -107,14 +113,7 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
     list($config['allowedContent'], $config['disallowedContent']) = $this->generateACFSettings($editor);
 
     // Add the format_tags setting, if its button is enabled.
-    $toolbar_rows = array();
-    $settings = $editor->getSettings();
-    foreach ($settings['toolbar']['rows'] as $row_number => $row) {
-      $toolbar_rows[] = array_reduce($settings['toolbar']['rows'][$row_number], function (&$result, $button_group) {
-        return array_merge($result, $button_group['items']);
-      }, array());
-    }
-    $toolbar_buttons = array_unique(NestedArray::mergeDeepArray($toolbar_rows));
+    $toolbar_buttons = CKEditorPluginManager::getEnabledButtons($editor);
     if (in_array('Format', $toolbar_buttons)) {
       $config['format_tags'] = $this->generateFormatTagsSetting($editor);
     }
@@ -123,7 +122,7 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
   }
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginButtonsInterface::getButtons().
+   * {@inheritdoc}
    */
   public function getButtons() {
     $button = function($name, $direction = 'ltr') {
@@ -477,11 +476,11 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
           //     Once validated, an element or its property cannot be
           //     invalidated by another rule.
           // That means that the most permissive setting wins. Which means that
-          // it will still be allowed by CKEditor to e.g. define any style, no
-          // matter what the "*" tag's restrictions may be. If there's a setting
-          // for either the "style" or "class" attribute, it cannot possibly be
-          // more permissive than what was set above. Hence: inherit from the
-          // "*" tag where possible.
+          // it will still be allowed by CKEditor, for instance, to define any
+          // style, no matter what the "*" tag's restrictions may be. If there
+          // is a setting for either the "style" or "class" attribute, it cannot
+          // possibly be more permissive than what was set above. Hence, inherit
+          // from the "*" tag where possible.
           if (isset($html_restrictions['allowed']['*'])) {
             $wildcard = $html_restrictions['allowed']['*'];
             if (isset($wildcard['style'])) {
@@ -538,16 +537,26 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
           if (count($allowed_attributes)) {
             $allowed[$tag]['attributes'] = implode(',', array_keys($allowed_attributes));
           }
-          if (isset($allowed_attributes['style']) && is_array($allowed_attributes['style'])) {
-            $allowed_styles = $get_attribute_values($allowed_attributes['style'], TRUE);
-            if (isset($allowed_styles)) {
-              $allowed[$tag]['styles'] = $allowed_styles;
+          if (isset($allowed_attributes['style'])) {
+            if (is_bool($allowed_attributes['style'])) {
+              $allowed[$tag]['styles'] = $allowed_attributes['style'];
+            }
+            elseif (is_array($allowed_attributes['style'])) {
+              $allowed_classes = $get_attribute_values($allowed_attributes['style'], TRUE);
+              if (isset($allowed_classes)) {
+                $allowed[$tag]['styles'] = $allowed_classes;
+              }
             }
           }
-          if (isset($allowed_attributes['class']) && is_array($allowed_attributes['class'])) {
-            $allowed_classes = $get_attribute_values($allowed_attributes['class'], TRUE);
-            if (isset($allowed_classes)) {
-              $allowed[$tag]['classes'] = $allowed_classes;
+          if (isset($allowed_attributes['class'])) {
+            if (is_bool($allowed_attributes['class'])) {
+              $allowed[$tag]['classes'] = $allowed_attributes['class'];
+            }
+            elseif (is_array($allowed_attributes['class'])) {
+              $allowed_classes = $get_attribute_values($allowed_attributes['class'], TRUE);
+              if (isset($allowed_classes)) {
+                $allowed[$tag]['classes'] = $allowed_classes;
+              }
             }
           }
 

@@ -21,8 +21,6 @@ use Symfony\Component\Config\ConfigCacheFactory;
  * Translator.
  *
  * @author Fabien Potencier <fabien@symfony.com>
- *
- * @api
  */
 class Translator implements TranslatorInterface, TranslatorBagInterface
 {
@@ -80,8 +78,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      * @param bool                 $debug    Use cache in debug mode ?
      *
      * @throws \InvalidArgumentException If a locale contains invalid characters
-     *
-     * @api
      */
     public function __construct($locale, MessageSelector $selector = null, $cacheDir = null, $debug = false)
     {
@@ -106,8 +102,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      *
      * @param string          $format The name of the loader (@see addResource())
      * @param LoaderInterface $loader A LoaderInterface instance
-     *
-     * @api
      */
     public function addLoader($format, LoaderInterface $loader)
     {
@@ -123,8 +117,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      * @param string $domain   The domain
      *
      * @throws \InvalidArgumentException If the locale contains invalid characters
-     *
-     * @api
      */
     public function addResource($format, $resource, $locale, $domain = null)
     {
@@ -145,8 +137,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @api
      */
     public function setLocale($locale)
     {
@@ -156,8 +146,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @api
      */
     public function getLocale()
     {
@@ -172,8 +160,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      * @throws \InvalidArgumentException If a locale contains invalid characters
      *
      * @deprecated since version 2.3, to be removed in 3.0. Use setFallbackLocales() instead.
-     *
-     * @api
      */
     public function setFallbackLocale($locales)
     {
@@ -188,8 +174,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      * @param array $locales The fallback locales
      *
      * @throws \InvalidArgumentException If a locale contains invalid characters
-     *
-     * @api
      */
     public function setFallbackLocales(array $locales)
     {
@@ -207,8 +191,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      * Gets the fallback locales.
      *
      * @return array $locales The fallback locales
-     *
-     * @api
      */
     public function getFallbackLocales()
     {
@@ -217,8 +199,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @api
      */
     public function trans($id, array $parameters = array(), $domain = null, $locale = null)
     {
@@ -231,8 +211,6 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @api
      */
     public function transChoice($id, $number, array $parameters = array(), $domain = null, $locale = null)
     {
@@ -289,9 +267,13 @@ class Translator implements TranslatorInterface, TranslatorBagInterface
      * @param string|null $locale Locale of translations, by default is current locale
      *
      * @return array[array] indexed by catalog
+     *
+     * @deprecated since version 2.8, to be removed in 3.0. Use TranslatorBagInterface::getCatalogue() method instead.
      */
     public function getMessages($locale = null)
     {
+        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.8 and will be removed in 3.0. Use TranslatorBagInterface::getCatalogue() method instead.', E_USER_DEPRECATED);
+
         $catalogue = $this->getCatalogue($locale);
         $messages = $catalogue->all();
         while ($catalogue = $catalogue->getFallbackCatalogue()) {
@@ -446,6 +428,9 @@ EOF
             }
 
             $fallbackCatalogue = new MessageCatalogue($fallback, $this->catalogues[$fallback]->all());
+            foreach ($this->catalogues[$fallback]->getResources() as $resource) {
+                $fallbackCatalogue->addResource($resource);
+            }
             $current->addFallbackCatalogue($fallbackCatalogue);
             $current = $fallbackCatalogue;
         }

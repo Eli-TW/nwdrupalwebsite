@@ -1,0 +1,77 @@
+.node--type-event {
+  &.node--view-mode-teaser {
+    .event-data {
+      @include bp("mama-bear") {
+        float: left;
+        width: 10em;
+      }
+    }
+
+    .event-description {
+      @include bp("mama-bear") {
+        float: right;
+        width: calc(100% - 11.5em);
+      }
+    }
+  }
+  &.node--view-mode-full {
+    .event-data {
+      @include span(3 of 9);
+    }
+
+    .event-description {
+      @include span(6 of 9 last);
+    }
+  }
+}
+
+.container {
+  div.layout-content {
+    @include span(7 of 9);
+  }
+  aside.layout-sidebar-first {
+    @include span(2 of 9 last);
+  }
+}
+
+.event-page-map {
+  @include clearfix;
+
+  div.event-page-map-left {
+    @include bp("mama-bear") {
+      @include span(2 of 9);
+    }
+  }
+
+  div.event-page-map-right {
+
+    @include bp("mama-bear") {
+      @include span(7 of 9 last);
+    }
+
+    img {
+      width: 100%;
+    }
+  }
+
+  + .front-page-join {
+    margin-top: 2rem;
+  }
+}
+
+
+.front-page-join {
+  @include clearfix;
+
+  div.front-page-join-left {
+    @include bp("mama-bear") {
+      @include span(4 of 8);
+    }
+  }
+  div.front-page-join-right {
+    @include bp("mama-bear") {
+      @include span(4 of 8 last);
+    }
+  }
+
+}

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\block\Plugin\Derivative\ThemeLocalTask.
- */
-
 namespace Drupal\block\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
@@ -50,7 +45,7 @@ class ThemeLocalTask extends DeriverBase implements ContainerDeriverInterface {
     $default_theme = $this->themeHandler->getDefault();
 
     foreach ($this->themeHandler->listInfo() as $theme_name => $theme) {
-      if ($theme->status) {
+      if ($this->themeHandler->hasUi($theme_name)) {
         $this->derivatives[$theme_name] = $base_plugin_definition;
         $this->derivatives[$theme_name]['title'] = $theme->info['name'];
         $this->derivatives[$theme_name]['route_parameters'] = array('theme' => $theme_name);

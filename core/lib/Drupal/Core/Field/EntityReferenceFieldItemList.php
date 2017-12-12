@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\EntityReferenceFieldItemList.
- */
-
 namespace Drupal\Core\Field;
 
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -14,6 +9,16 @@ use Drupal\Core\Form\FormStateInterface;
  * Defines a item list class for entity reference fields.
  */
 class EntityReferenceFieldItemList extends FieldItemList implements EntityReferenceFieldItemListInterface {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConstraints() {
+    $constraints = parent::getConstraints();
+    $constraint_manager = $this->getTypedDataManager()->getValidationConstraintManager();
+    $constraints[] = $constraint_manager->create('ValidReference', []);
+    return $constraints;
+  }
 
   /**
    * {@inheritdoc}

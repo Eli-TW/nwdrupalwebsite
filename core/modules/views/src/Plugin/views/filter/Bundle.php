@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\filter\Bundle.
- */
-
 namespace Drupal\views\Plugin\views\filter;
 
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -73,7 +68,7 @@ class Bundle extends InOperator {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\filter\InOperator::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
@@ -84,7 +79,7 @@ class Bundle extends InOperator {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\filter\InOperator::getValueOptions().
+   * {@inheritdoc}
    */
   public function getValueOptions() {
     if (!isset($this->valueOptions)) {
@@ -104,7 +99,7 @@ class Bundle extends InOperator {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\filter\InOperator::query().
+   * {@inheritdoc}
    */
   public function query() {
     // Make sure that the entity base table is in the query.

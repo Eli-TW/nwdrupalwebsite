@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\Tests\CommentTranslationUITest.
- */
-
 namespace Drupal\comment\Tests;
 
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
@@ -63,7 +58,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   }
 
   /**
-   * Overrides \Drupal\content_translation\Tests\ContentTranslationUITestBase::setupBundle().
+   * {@inheritdoc}
    */
   function setupBundle() {
     parent::setupBundle();
@@ -80,14 +75,14 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   }
 
   /**
-   * Overrides \Drupal\content_translation\Tests\ContentTranslationUITestBase::getTranslatorPermission().
+   * {@inheritdoc}
    */
   protected function getTranslatorPermissions() {
     return array_merge(parent::getTranslatorPermissions(), array('post comments', 'administer comments', 'access comments'));
   }
 
   /**
-   * Overrides \Drupal\content_translation\Tests\ContentTranslationUITestBase::createEntity().
+   * {@inheritdoc}
    */
   protected function createEntity($values, $langcode, $comment_type = 'comment_article') {
     if ($comment_type == 'comment_article') {
@@ -114,7 +109,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   }
 
   /**
-   * Overrides \Drupal\content_translation\Tests\ContentTranslationUITestBase::getNewEntityValues().
+   * {@inheritdoc}
    */
   protected function getNewEntityValues($langcode) {
     // Comment subject is not translatable hence we use a fixed value.
@@ -164,7 +159,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
         'created' => REQUEST_TIME - mt_rand(0, 1000),
       );
       $edit = array(
-        'uid' => $user->getUsername() . '(' . $user->id() . ')',
+        'uid' => $user->getUsername() . ' (' . $user->id() . ')',
         'date[date]' => format_date($values[$langcode]['created'], 'custom', 'Y-m-d'),
         'date[time]' => format_date($values[$langcode]['created'], 'custom', 'H:i:s'),
       );

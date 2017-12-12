@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\Entity\Feed.
- */
-
 namespace Drupal\aggregator\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
@@ -53,7 +48,7 @@ use Drupal\aggregator\FeedInterface;
 class Feed extends ContentEntityBase implements FeedInterface {
 
   /**
-   * Implements Drupal\Core\Entity\EntityInterface::label().
+   * {@inheritdoc}
    */
   public function label() {
     return $this->get('title')->value;

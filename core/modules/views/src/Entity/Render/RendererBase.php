@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Entity\Render\RendererBase.
- */
-
 namespace Drupal\views\Entity\Render;
 
 use Drupal\Core\Cache\Cache;
@@ -37,7 +32,7 @@ abstract class RendererBase implements CacheableDependencyInterface {
   /**
    * The type of the entity being rendered.
    *
-   * @var string
+   * @var \Drupal\Core\Entity\EntityTypeInterface
    */
   protected $entityType;
 

@@ -1,28 +1,13 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\RegisterForm.
- */
-
 namespace Drupal\user;
 
-use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 
 /**
- * Form controller for the user register forms.
+ * Form handler for the user register forms.
  */
 class RegisterForm extends AccountForm {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(EntityManagerInterface $entity_manager, LanguageManagerInterface $language_manager, QueryFactory $entity_query) {
-    parent::__construct($entity_manager, $language_manager, $entity_query);
-  }
 
   /**
    * {@inheritdoc}
@@ -63,7 +48,7 @@ class RegisterForm extends AccountForm {
   }
 
   /**
-   * Overrides Drupal\Core\Entity\EntityForm::actions().
+   * {@inheritdoc}
    */
   protected function actions(array $form, FormStateInterface $form_state) {
     $element = parent::actions($form, $form_state);
@@ -150,4 +135,5 @@ class RegisterForm extends AccountForm {
       $form_state->setRedirect('<front>');
     }
   }
+
 }

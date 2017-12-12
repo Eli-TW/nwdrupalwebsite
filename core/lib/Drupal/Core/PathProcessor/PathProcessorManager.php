@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\PathProcessor\PathProcessorManager.
- */
-
 namespace Drupal\Core\PathProcessor;
 
 use Drupal\Core\Render\BubbleableMetadata;
@@ -67,7 +62,7 @@ class PathProcessorManager implements InboundPathProcessorInterface, OutboundPat
   }
 
   /**
-   * Implements Drupal\Core\PathProcessor\InboundPathProcessorInterface::processInbound().
+   * {@inheritdoc}
    */
   public function processInbound($path, Request $request) {
     $processors = $this->getInbound();
@@ -106,7 +101,7 @@ class PathProcessorManager implements InboundPathProcessorInterface, OutboundPat
   }
 
   /**
-   * Implements Drupal\Core\PathProcessor\OutboundPathProcessorInterface::processOutbound().
+   * {@inheritdoc}
    */
   public function processOutbound($path, &$options = array(), Request $request = NULL, BubbleableMetadata $bubbleable_metadata = NULL) {
     $processors = $this->getOutbound();
@@ -145,4 +140,5 @@ class PathProcessorManager implements InboundPathProcessorInterface, OutboundPat
     }
     return $sorted;
   }
+
 }

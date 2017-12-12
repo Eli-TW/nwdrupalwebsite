@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Validation\Plugin\Validation\Constraint\RangeConstraint.
- */
-
 namespace Drupal\Core\Validation\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraints\Range;
@@ -28,9 +23,10 @@ class RangeConstraint extends Range {
   public $maxMessage = 'This value should be %limit or less.';
 
   /**
-   * Overrides Range::validatedBy().
+   * {@inheritdoc}
    */
   public function validatedBy() {
     return '\Symfony\Component\Validator\Constraints\RangeValidator';
   }
+
 }

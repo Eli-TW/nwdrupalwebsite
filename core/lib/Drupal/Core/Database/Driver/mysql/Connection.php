@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Database\Driver\mysql\Connection.
- */
-
 namespace Drupal\Core\Database\Driver\mysql;
 
 use Drupal\Core\Database\DatabaseExceptionWrapper;
@@ -21,6 +16,9 @@ use Drupal\Component\Utility\Unicode;
  * @{
  */
 
+/**
+ * MySQL implementation of \Drupal\Core\Database\Connection.
+ */
 class Connection extends DatabaseConnection {
 
   /**
@@ -32,6 +30,16 @@ class Connection extends DatabaseConnection {
    * Error code for "Can't initialize character set" error.
    */
   const UNSUPPORTED_CHARSET = 2019;
+
+  /**
+   * Driver-specific error code for "Unknown character set" error.
+   */
+  const UNKNOWN_CHARSET = 1115;
+
+  /**
+   * SQLSTATE error code for "Syntax error or access rule violation".
+   */
+  const SQLSTATE_SYNTAX_ERROR = 42000;
 
   /**
    * Flag to indicate if the cleanup function in __destruct() should run.
@@ -71,7 +79,8 @@ class Connection extends DatabaseConnection {
   public function query($query, array $args = array(), $options = array()) {
     try {
       return parent::query($query, $args, $options);
-    } catch (DatabaseException $e) {
+    }
+    catch (DatabaseException $e) {
       if ($e->getPrevious()->errorInfo[1] == 1153) {
         // If a max_allowed_packet error occurs the message length is truncated.
         // This should prevent the error from recurring if the exception is

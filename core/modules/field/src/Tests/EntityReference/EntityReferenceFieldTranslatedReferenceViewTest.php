@@ -1,15 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field\Tests\EntityReference\EntityReferenceFieldTranslatedReferenceViewTest.
- */
-
 namespace Drupal\field\Tests\EntityReference;
 
+use Drupal\field\Entity\FieldConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\simpletest\WebTestBase;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Tests the translation of entity reference field display on nodes.
@@ -140,9 +137,26 @@ class EntityReferenceFieldTranslatedReferenceViewTest extends WebTestBase {
   }
 
   /**
-   * Tests if the translated entity is displayed in an entity reference field.
+   * Tests if the entity is displayed in an entity reference field.
    */
-  public function testTranslatedEntityReferenceDisplay() {
+  public function testEntityReferenceDisplay() {
+    // Create a translated referrer entity.
+    $this->referrerEntity = $this->createReferrerEntity();
+    $this->assertEntityReferenceDisplay();
+
+    // Disable translation for referrer content type.
+    $this->drupalLogin($this->rootUser);
+    $this->drupalPostForm('admin/config/regional/content-language', ['settings[node][referrer][translatable]' => FALSE], t('Save configuration'));
+
+    // Create a referrer entity without translation.
+    $this->referrerEntity = $this->createReferrerEntity(FALSE);
+    $this->assertEntityReferenceDisplay();
+  }
+
+  /**
+   * Assert entity reference display.
+   */
+  protected function assertEntityReferenceDisplay() {
     $url = $this->referrerEntity->urlInfo();
     $translation_url = $this->referrerEntity->urlInfo('canonical', ['language' => ConfigurableLanguage::load($this->translateToLangcode)]);
 
@@ -169,7 +183,6 @@ class EntityReferenceFieldTranslatedReferenceViewTest extends WebTestBase {
   protected function createContent() {
     $this->referencedEntityWithTranslation = $this->createReferencedEntityWithTranslation();
     $this->referencedEntityWithoutTranslation = $this->createNotTranslatedReferencedEntity();
-    $this->referrerEntity = $this->createReferrerEntity();
   }
 
   /**
@@ -190,7 +203,7 @@ class EntityReferenceFieldTranslatedReferenceViewTest extends WebTestBase {
    * Adds term reference field for the article content type.
    */
   protected function setUpEntityReferenceField() {
-    entity_create('field_storage_config', array(
+    FieldStorageConfig::create(array(
       'field_name' => $this->referenceFieldName,
       'entity_type' => $this->testEntityTypeName,
       'type' => 'entity_reference',
@@ -205,11 +218,11 @@ class EntityReferenceFieldTranslatedReferenceViewTest extends WebTestBase {
       ),
     ))->save();
 
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_name' => $this->referenceFieldName,
       'bundle' => $this->referrerType->id(),
       'entity_type' => $this->testEntityTypeName,
-    ))
+    ])
     ->save();
     entity_get_form_display($this->testEntityTypeName, $this->referrerType->id(), 'default')
       ->setComponent($this->referenceFieldName, array(
@@ -283,7 +296,7 @@ class EntityReferenceFieldTranslatedReferenceViewTest extends WebTestBase {
   /**
    * Create the referrer entity.
    */
-  protected function createReferrerEntity() {
+  protected function createReferrerEntity($translatable = TRUE) {
     /** @var \Drupal\node\Entity\Node $node */
     $node = entity_create($this->testEntityTypeName, array(
       'title' => $this->randomMachineName(),
@@ -298,8 +311,9 @@ class EntityReferenceFieldTranslatedReferenceViewTest extends WebTestBase {
       ),
       'langcode' => $this->baseLangcode,
     ));
-    $node->save();
-    $node->addTranslation($this->translateToLangcode, $node->toArray());
+    if ($translatable) {
+      $node->addTranslation($this->translateToLangcode, $node->toArray());
+    }
     $node->save();
 
     return $node;

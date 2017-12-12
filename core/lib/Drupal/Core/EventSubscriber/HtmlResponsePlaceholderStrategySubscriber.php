@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\EventSubscriber\HtmlResponsePlaceholderStrategySubscriber.
- */
-
 namespace Drupal\Core\EventSubscriber;
 
 use Drupal\Core\Render\HtmlResponse;
@@ -48,10 +43,6 @@ class HtmlResponsePlaceholderStrategySubscriber implements EventSubscriberInterf
    *   The event to process.
    */
   public function onRespond(FilterResponseEvent $event) {
-    if (!$event->isMasterRequest()) {
-      return;
-    }
-
     $response = $event->getResponse();
     if (!$response instanceof HtmlResponse) {
       return;

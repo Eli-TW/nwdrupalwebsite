@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\argument\ManyToOne.
- */
-
 namespace Drupal\views\Plugin\views\argument;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -30,7 +25,7 @@ use Drupal\views\ManyToOneHelper;
 class ManyToOne extends ArgumentPluginBase {
 
   /**
-   * Overrides \Drupal\views\Plugin\views\argument\ArgumentPluginBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);

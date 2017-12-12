@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\url_alter_test\PathProcessor.
- */
-
 namespace Drupal\url_alter_test;
 
 use Drupal\Core\PathProcessor\InboundPathProcessorInterface;
@@ -16,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 class PathProcessor implements InboundPathProcessorInterface {
 
   /**
-   * Implements Drupal\Core\PathProcessor\InboundPathProcessorInterface::processInbound().
+   * {@inheritdoc}
    */
   public function processInbound($path, Request $request) {
     if (preg_match('!^/user/([^/]+)(/.*)?!', $path, $matches)) {
@@ -34,4 +29,5 @@ class PathProcessor implements InboundPathProcessorInterface {
     }
     return $path;
   }
+
 }

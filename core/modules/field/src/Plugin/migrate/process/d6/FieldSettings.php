@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field\Plugin\migrate\process\d6\FieldSettings.
- */
-
 namespace Drupal\field\Plugin\migrate\process\d6;
 
 use Drupal\migrate\MigrateExecutableInterface;
@@ -44,6 +39,7 @@ class FieldSettings extends ProcessPluginBase {
   public function getSettings($field_type, $global_settings) {
     $max_length = isset($global_settings['max_length']) ? $global_settings['max_length'] : '';
     $max_length = empty($max_length) ? 255 : $max_length;
+    $allowed_values = [];
     if (isset($global_settings['allowed_values'])) {
       $list = explode("\n", $global_settings['allowed_values']);
       $list = array_map('trim', $list);
@@ -61,9 +57,6 @@ class FieldSettings extends ProcessPluginBase {
         default:
           $allowed_values = $list;
       }
-    }
-    else {
-      $allowed_values = '';
     }
 
     $settings = array(

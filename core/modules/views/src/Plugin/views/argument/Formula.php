@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\argument\Formula.
- */
-
 namespace Drupal\views\Plugin\views\argument;
 
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
@@ -24,10 +19,10 @@ use Drupal\views\ViewExecutable;
  */
 class Formula extends ArgumentPluginBase {
 
-  var $formula = NULL;
+  public $formula = NULL;
 
   /**
-   * Overrides Drupal\views\Plugin\views\argument\ArgumentPluginBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
@@ -63,7 +58,7 @@ class Formula extends ArgumentPluginBase {
     $this->ensureMyTable();
     // Now that our table is secure, get our formula.
     $placeholder = $this->placeholder();
-    $formula = $this->getFormula() .' = ' . $placeholder;
+    $formula = $this->getFormula() . ' = ' . $placeholder;
     $placeholders = array(
       $placeholder => $this->argument,
     );

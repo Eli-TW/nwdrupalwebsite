@@ -55,6 +55,11 @@ services:
     arguments: ['@request_stack']
     tags:
       - { name: cache.context}
+  cache_context.session.exists:
+    class: Drupal\Core\Cache\Context\SessionExistsCacheContext
+    arguments: ['@session_configuration', '@request_stack']
+    tags:
+      - { name: cache.context}
   cache_context.request_format:
     class: Drupal\Core\Cache\Context\RequestFormatCacheContext
     arguments: ['@request_stack']
@@ -72,6 +77,11 @@ services:
       - { name: cache.context }
   cache_context.url.path:
     class: Drupal\Core\Cache\Context\PathCacheContext
+    arguments: ['@request_stack']
+    tags:
+      - { name: cache.context }
+  cache_context.url.path.parent:
+    class: Drupal\Core\Cache\Context\PathParentCacheContext
     arguments: ['@request_stack']
     tags:
       - { name: cache.context }
@@ -468,7 +478,7 @@ services:
     class: Drupal\Core\Extension\ModuleInstaller
     tags:
       - { name: service_collector, tag: 'module_install.uninstall_validator', call: addUninstallValidator }
-    arguments: ['@app.root', '@module_handler', '@kernel']
+    arguments: ['@app.root', '@module_handler', '@kernel', '@router.builder']
     lazy: true
   content_uninstall_validator:
     class: Drupal\Core\Entity\ContentUninstallValidator
@@ -496,10 +506,38 @@ services:
     arguments: ['@theme_handler', '@config.factory', '@config.installer', '@module_handler', '@config.manager', '@asset.css.collection_optimizer', '@router.builder', '@logger.channel.default', '@state']
   entity.manager:
     class: Drupal\Core\Entity\EntityManager
-    arguments: ['@container.namespaces', '@module_handler', '@cache.discovery', '@language_manager', '@string_translation', '@class_resolver', '@typed_data_manager', '@keyvalue', '@event_dispatcher']
+    parent: container.trait
+    deprecated: '%service_id%-no-warning'
+    # @todo Remove this tag in https://www.drupal.org/node/2549143.
+    tags:
+      - { name: plugin_manager_cache_clear }
+  entity_type.manager:
+    class: Drupal\Core\Entity\EntityTypeManager
+    arguments: ['@container.namespaces', '@module_handler', '@cache.discovery', '@string_translation', '@class_resolver']
     parent: container.trait
     tags:
       - { name: plugin_manager_cache_clear }
+  entity_type.repository:
+    class: Drupal\Core\Entity\EntityTypeRepository
+    arguments: ['@entity_type.manager']
+  entity_type.bundle.info:
+    class: Drupal\Core\Entity\EntityTypeBundleInfo
+    arguments: ['@entity_type.manager', '@language_manager', '@module_handler', '@typed_data_manager', '@cache.discovery']
+  entity.repository:
+    class: Drupal\Core\Entity\EntityRepository
+    arguments: ['@entity_type.manager', '@language_manager']
+  entity_display.repository:
+    class: Drupal\Core\Entity\EntityDisplayRepository
+    arguments: ['@entity_type.manager', '@module_handler', '@cache.discovery', '@language_manager']
+  entity_field.manager:
+    class: Drupal\Core\Entity\EntityFieldManager
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@entity_display.repository', '@typed_data_manager', '@language_manager', '@keyvalue', '@module_handler', '@cache.discovery']
+  entity_type.listener:
+    class: Drupal\Core\Entity\EntityTypeListener
+    arguments: ['@entity_type.manager', '@entity_field.manager', '@event_dispatcher', '@entity.last_installed_schema.repository']
+  entity_bundle.listener:
+    class: Drupal\Core\Entity\EntityBundleListener
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@entity_field.manager', '@module_handler']
   entity_route_subscriber:
     class: Drupal\Core\EventSubscriber\EntityRouteProviderSubscriber
     arguments: ['@entity.manager']
@@ -508,6 +546,15 @@ services:
   entity.definition_update_manager:
     class: Drupal\Core\Entity\EntityDefinitionUpdateManager
     arguments: ['@entity.manager']
+  entity.last_installed_schema.repository:
+    class: Drupal\Core\Entity\EntityLastInstalledSchemaRepository
+    arguments: ['@keyvalue']
+  field_storage_definition.listener:
+    class: Drupal\Core\Field\FieldStorageDefinitionListener
+    arguments: ['@entity_type.manager', '@event_dispatcher', '@entity.last_installed_schema.repository', '@entity_field.manager']
+  field_definition.listener:
+    class: Drupal\Core\Field\FieldDefinitionListener
+    arguments: ['@entity_type.manager', '@entity_field.manager', '@keyvalue', '@cache.discovery']
   entity.form_builder:
     class: Drupal\Core\Entity\EntityFormBuilder
     arguments: ['@entity.manager', '@form_builder']
@@ -721,6 +768,9 @@ services:
     tags:
       - { name: event_subscriber }
       - { name: backend_overridable }
+  router.route_provider.lazy_builder:
+    class: Drupal\Core\Routing\RouteProviderLazyBuilder
+    arguments: ['@router.route_provider', '@router.builder']
   router.route_preloader:
     class: Drupal\Core\Routing\RoutePreloader
     arguments: ['@router.route_provider', '@state', '@cache.bootstrap']
@@ -867,6 +917,11 @@ services:
     tags:
       - { name: paramconverter }
     arguments: ['@entity.manager']
+  paramconverter.entity_revision:
+    class: Drupal\Core\ParamConverter\EntityRevisionParamConverter
+    tags:
+      - { name: paramconverter }
+    arguments: ['@entity_type.manager']
   paramconverter.configentity_admin:
     class: Drupal\Core\ParamConverter\AdminPathConfigEntityConverter
     tags:
@@ -913,14 +968,18 @@ services:
     tags:
       - { name: route_enhancer }
       - { name: event_subscriber }
+  route_enhancer.form:
+    class: Drupal\Core\Routing\Enhancer\FormRouteEnhancer
+    tags:
+      - { name: route_enhancer }
   route_enhancer.entity:
     class: Drupal\Core\Entity\Enhancer\EntityRouteEnhancer
     tags:
       - { name: route_enhancer, priority: 20 }
-  route_content_controller_subscriber:
-    class: Drupal\Core\EventSubscriber\ContentControllerSubscriber
+  route_enhancer.entity_revision:
+    class: Drupal\Core\Routing\Enhancer\EntityRevisionRouteEnhancer
     tags:
-      - { name: event_subscriber }
+      - { name: route_enhancer }
   route_special_attributes_subscriber:
     class: Drupal\Core\EventSubscriber\SpecialAttributesRouteSubscriber
     tags:
@@ -979,7 +1038,12 @@ services:
     class: Symfony\Component\HttpKernel\EventListener\RouterListener
     tags:
       - { name: event_subscriber }
-    arguments: ['@router', '@router.request_context', NULL, '@request_stack']
+    arguments: ['@router', '@request_stack', '@router.request_context', NULL]
+  options_request_listener:
+    class: Drupal\Core\EventSubscriber\OptionsRequestSubscriber
+    arguments: ['@router.route_provider']
+    tags:
+      - { name: event_subscriber }
   bare_html_page_renderer:
     class: Drupal\Core\Render\BareHtmlPageRenderer
     arguments: ['@renderer', '@html_response.attachments_processor']
@@ -1013,6 +1077,11 @@ services:
     arguments: ['@entity.manager']
     tags:
       - { name: access_check, applies_to: _entity_create_access }
+  access_check.entity_create_any:
+    class: Drupal\Core\Entity\EntityCreateAnyAccessCheck
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info']
+    tags:
+      - { name: access_check, applies_to: _entity_create_any_access }
   access_check.theme:
     class: Drupal\Core\Theme\ThemeAccessCheck
     arguments: ['@theme_handler']
@@ -1108,7 +1177,7 @@ services:
     class: Drupal\Core\EventSubscriber\DefaultExceptionHtmlSubscriber
     tags:
       - { name: event_subscriber }
-    arguments: ['@http_kernel', '@logger.channel.php', '@redirect.destination']
+    arguments: ['@http_kernel', '@logger.channel.php', '@redirect.destination', '@router.no_access_checks']
   exception.default:
     class: Drupal\Core\EventSubscriber\DefaultExceptionSubscriber
     tags:
@@ -1128,7 +1197,7 @@ services:
     class: Drupal\Core\EventSubscriber\CustomPageExceptionHtmlSubscriber
     tags:
       - { name: event_subscriber }
-    arguments: ['@config.factory', '@path.alias_manager', '@http_kernel', '@logger.channel.php', '@redirect.destination']
+    arguments: ['@config.factory', '@http_kernel', '@logger.channel.php', '@redirect.destination', '@router.no_access_checks', '@access_manager']
   exception.fast_404_html:
     class: Drupal\Core\EventSubscriber\Fast404ExceptionHtmlSubscriber
     tags:
@@ -1220,7 +1289,7 @@ services:
       - { name: plugin_manager_cache_clear }
   image.toolkit.operation.manager:
     class: Drupal\Core\ImageToolkit\ImageToolkitOperationManager
-    arguments: ['@logger.channel.image']
+    arguments: ['@logger.channel.image', '@image.toolkit.manager']
     parent: default_plugin_manager
     tags:
       - { name: plugin_manager_cache_clear }
@@ -1261,74 +1330,74 @@ services:
     calls:
       - [setContainer, ['@service_container']]
     arguments: ['feed.writer.']
-# Zend Feed reader plugins. Plugins should be set as prototype scope.
+# Zend Feed reader plugins. Plugin instances should not be shared.
   feed.reader.dublincoreentry:
     class: Zend\Feed\Reader\Extension\DublinCore\Entry
-    scope: prototype
+    shared: false
   feed.reader.dublincorefeed:
     class: Zend\Feed\Reader\Extension\DublinCore\Feed
-    scope: prototype
+    shared: false
   feed.reader.contententry:
     class: Zend\Feed\Reader\Extension\Content\Entry
-    scope: prototype
+    shared: false
   feed.reader.atomentry:
     class: Zend\Feed\Reader\Extension\Atom\Entry
-    scope: prototype
+    shared: false
   feed.reader.atomfeed:
     class: Zend\Feed\Reader\Extension\Atom\Feed
-    scope: prototype
+    shared: false
   feed.reader.slashentry:
     class: Zend\Feed\Reader\Extension\Slash\Entry
-    scope: prototype
+    shared: false
   feed.reader.wellformedwebentry:
     class: Zend\Feed\Reader\Extension\WellFormedWeb\Entry
-    scope: prototype
+    shared: false
   feed.reader.threadentry:
     class: Zend\Feed\Reader\Extension\Thread\Entry
-    scope: prototype
+    shared: false
   feed.reader.podcastentry:
     class: Zend\Feed\Reader\Extension\Podcast\Entry
-    scope: prototype
+    shared: false
   feed.reader.podcastfeed:
     class: Zend\Feed\Reader\Extension\Podcast\Feed
-    scope: prototype
+    shared: false
 # Zend Feed writer plugins. Plugins should be set as prototype scope.
   feed.writer.atomrendererfeed:
     class: Zend\Feed\Writer\Extension\Atom\Renderer\Feed
-    scope: prototype
+    shared: false
   feed.writer.contentrendererentry:
     class: Zend\Feed\Writer\Extension\Content\Renderer\Entry
-    scope: prototype
+    shared: false
   feed.writer.dublincorerendererentry:
     class: Zend\Feed\Writer\Extension\DublinCore\Renderer\Entry
-    scope: prototype
+    shared: false
   feed.writer.dublincorerendererfeed:
     class: Zend\Feed\Writer\Extension\DublinCore\Renderer\Feed
-    scope: prototype
+    shared: false
   feed.writer.itunesentry:
     class: Zend\Feed\Writer\Extension\ITunes\Entry
-    scope: prototype
+    shared: false
   feed.writer.itunesfeed:
     class: Zend\Feed\Writer\Extension\ITunes\Feed
-    scope: prototype
+    shared: false
   feed.writer.itunesrendererentry:
     class: Zend\Feed\Writer\Extension\ITunes\Renderer\Entry
-    scope: prototype
+    shared: false
   feed.writer.itunesrendererfeed:
     class: Zend\Feed\Writer\Extension\ITunes\Renderer\Feed
-    scope: prototype
+    shared: false
   feed.writer.slashrendererentry:
     class: Zend\Feed\Writer\Extension\Slash\Renderer\Entry
-    scope: prototype
+    shared: false
   feed.writer.threadingrendererentry:
     class: Zend\Feed\Writer\Extension\Threading\Renderer\Entry
-    scope: prototype
+    shared: false
   feed.writer.wellformedwebrendererentry:
     class: Zend\Feed\Writer\Extension\WellFormedWeb\Renderer\Entry
-    scope: prototype
+    shared: false
   theme.manager:
     class: Drupal\Core\Theme\ThemeManager
-    arguments: ['@app.root', '@theme.negotiator', '@theme.initialization', '@request_stack', '@module_handler']
+    arguments: ['@app.root', '@theme.negotiator', '@theme.initialization', '@module_handler']
     calls:
       - [setThemeRegistry, ['@theme.registry']]
   theme.initialization:
@@ -1424,7 +1493,7 @@ services:
     class: Drupal\Core\Asset\AssetDumper
   library.discovery:
     class: Drupal\Core\Asset\LibraryDiscovery
-    arguments: ['@library.discovery.collector', '@cache_tags.invalidator']
+    arguments: ['@library.discovery.collector']
   library.discovery.collector:
     class: Drupal\Core\Asset\LibraryDiscoveryCollector
     arguments: ['@cache.discovery', '@lock', '@library.discovery.parser', '@theme.manager']

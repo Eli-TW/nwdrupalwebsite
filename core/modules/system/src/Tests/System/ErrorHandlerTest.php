@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\System\ErrorHandlerTest.
- */
-
 namespace Drupal\system\Tests\System;
 
 use Drupal\simpletest\WebTestBase;
@@ -49,13 +44,13 @@ class ErrorHandlerTest extends WebTestBase {
     $fatal_error = array(
       '%type' => 'Recoverable fatal error',
       '%function' => 'Drupal\error_test\Controller\ErrorTestController->Drupal\error_test\Controller\{closure}()',
-      '@message' => 'Argument 1 passed to Drupal\error_test\Controller\ErrorTestController::Drupal\error_test\Controller\{closure}() must be of the type array, string given, called in ' . \Drupal::root() . '/core/modules/system/tests/modules/error_test/src/Controller/ErrorTestController.php on line 66 and defined',
+      '@message' => 'Argument 1 passed to Drupal\error_test\Controller\ErrorTestController::Drupal\error_test\Controller\{closure}() must be of the type array, string given, called in ' . \Drupal::root() . '/core/modules/system/tests/modules/error_test/src/Controller/ErrorTestController.php on line 62 and defined',
     );
-    if (version_compare(PHP_VERSION, '7.0.0-dev') >= 0)  {
+    if (version_compare(PHP_VERSION, '7.0.0-dev') >= 0) {
       // In PHP 7, instead of a recoverable fatal error we get a TypeError.
       $fatal_error['%type'] = 'TypeError';
       // The error message also changes in PHP 7.
-      $fatal_error['@message'] = 'Argument 1 passed to Drupal\error_test\Controller\ErrorTestController::Drupal\error_test\Controller\{closure}() must be of the type array, string given, called in ' . \Drupal::root() . '/core/modules/system/tests/modules/error_test/src/Controller/ErrorTestController.php on line 66';
+      $fatal_error['@message'] = 'Argument 1 passed to Drupal\error_test\Controller\ErrorTestController::Drupal\error_test\Controller\{closure}() must be of the type array, string given, called in ' . \Drupal::root() . '/core/modules/system/tests/modules/error_test/src/Controller/ErrorTestController.php on line 62';
     }
 
     // Set error reporting to display verbose notices.
@@ -100,6 +95,7 @@ class ErrorHandlerTest extends WebTestBase {
     $this->assertErrorMessage($error_warning);
     $this->assertErrorMessage($error_user_notice);
     $this->assertNoRaw('<pre class="backtrace">', 'Did not find pre element with backtrace class.');
+    $this->assertErrorLogged($fatal_error['@message']);
 
     // Set error reporting to not collect notices.
     $config->set('error_level', ERROR_REPORTING_DISPLAY_SOME)->save();

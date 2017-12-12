@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_test_data\Plugin\views\query\QueryTest.
- */
-
 namespace Drupal\views_test_data\Plugin\views\query;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -29,7 +24,7 @@ class QueryTest extends QueryPluginBase {
   protected $orderBy = array();
 
   /**
-   * Implements \Drupal\views\Plugin\views\query\QueryPluginBase::defineOptions().
+   * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -39,7 +34,7 @@ class QueryTest extends QueryPluginBase {
   }
 
   /**
-   * Implements \Drupal\views\Plugin\views\query\QueryPluginBase::buildOptionsForm().
+   * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
@@ -98,7 +93,7 @@ class QueryTest extends QueryPluginBase {
 }
 
   /**
-   * Implements Drupal\views\Plugin\views\query\QueryPluginBase::execute().
+   * {@inheritdoc}
    */
   public function execute(ViewExecutable $view) {
     $result = array();

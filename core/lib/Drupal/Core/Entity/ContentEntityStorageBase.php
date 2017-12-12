@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\ContentEntityStorageBase.
- */
-
 namespace Drupal\Core\Entity;
 
 use Drupal\Core\Cache\Cache;
@@ -13,7 +8,10 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-abstract class ContentEntityStorageBase extends EntityStorageBase implements DynamicallyFieldableEntityStorageInterface {
+/**
+ * Base class for content entity storage handlers.
+ */
+abstract class ContentEntityStorageBase extends EntityStorageBase implements ContentEntityStorageInterface, DynamicallyFieldableEntityStorageInterface {
 
   /**
    * The entity bundle key.
@@ -87,13 +85,32 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Dyn
       $bundle = $values[$this->bundleKey];
     }
     $entity = new $this->entityClass(array(), $this->entityTypeId, $bundle);
+    $this->initFieldValues($entity, $values);
+    return $entity;
+  }
 
+  /**
+   * Initializes field values.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   An entity object.
+   * @param array $values
+   *   (optional) An associative array of initial field values keyed by field
+   *   name. If none is provided default values will be applied.
+   * @param array $field_names
+   *   (optional) An associative array of field names to be initialized. If none
+   *   is provided all fields will be initialized.
+   */
+  protected function initFieldValues(ContentEntityInterface $entity, array $values = [], array $field_names = []) {
+    // Populate field values.
     foreach ($entity as $name => $field) {
-      if (isset($values[$name])) {
-        $entity->$name = $values[$name];
-      }
-      elseif (!array_key_exists($name, $values)) {
-        $entity->get($name)->applyDefaultValue();
+      if (!$field_names || isset($field_names[$name])) {
+        if (isset($values[$name])) {
+          $entity->$name = $values[$name];
+        }
+        elseif (!array_key_exists($name, $values)) {
+          $entity->get($name)->applyDefaultValue();
+        }
       }
       unset($values[$name]);
     }
@@ -102,7 +119,23 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Dyn
     foreach ($values as $name => $value) {
       $entity->$name = $value;
     }
-    return $entity;
+
+    // Make sure modules can alter field initial values.
+    $this->invokeHook('field_values_init', $entity);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createTranslation(ContentEntityInterface $entity, $langcode, array $values = []) {
+    $translation = $entity->getTranslation($langcode);
+    $definitions = array_filter($translation->getFieldDefinitions(), function(FieldDefinitionInterface $definition) { return $definition->isTranslatable(); });
+    $field_names = array_map(function(FieldDefinitionInterface $definition) { return $definition->getName(); }, $definitions);
+    $values[$this->langcodeKey] = $langcode;
+    $values[$this->getEntityType()->getKey('default_langcode')] = FALSE;
+    $this->initFieldValues($translation, $values, $field_names);
+    $this->invokeHook('translation_create', $translation);
+    return $translation;
   }
 
   /**
@@ -402,7 +435,8 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Dyn
   protected function invokeFieldMethod($method, ContentEntityInterface $entity) {
     $result = [];
     $args = array_slice(func_get_args(), 2);
-    foreach (array_keys($entity->getTranslationLanguages()) as $langcode) {
+    $langcodes = array_keys($entity->getTranslationLanguages());
+    foreach ($langcodes as $langcode) {
       $translation = $entity->getTranslation($langcode);
       // For non translatable fields, there is only one field object instance
       // across all translations and it has as parent entity the entity in the
@@ -415,6 +449,20 @@ abstract class ContentEntityStorageBase extends EntityStorageBase implements Dyn
         $result[$langcode][$name] = $args ? call_user_func_array([$items, $method], $args) : $items->{$method}();
       }
     }
+
+    // We need to call the delete method for field items of removed
+    // translations.
+    if ($method == 'postSave' && !empty($entity->original)) {
+      $original_langcodes = array_keys($entity->original->getTranslationLanguages());
+      foreach (array_diff($original_langcodes, $langcodes) as $removed_langcode) {
+        $translation = $entity->original->getTranslation($removed_langcode);
+        $fields = $translation->getTranslatableFields();
+        foreach ($fields as $name => $items) {
+          $items->delete();
+        }
+      }
+    }
+
     return $result;
   }
 

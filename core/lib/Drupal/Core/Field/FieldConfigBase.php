@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\FieldConfigBase.
- */
-
 namespace Drupal\Core\Field;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
@@ -366,6 +361,7 @@ abstract class FieldConfigBase extends ConfigEntityBase implements FieldConfigIn
    */
   public function setSetting($setting_name, $value) {
     $this->settings[$setting_name] = $value;
+    return $this;
   }
 
   /**
@@ -535,6 +531,7 @@ abstract class FieldConfigBase extends ConfigEntityBase implements FieldConfigIn
    */
   public function setConstraints(array $constraints) {
     $this->constraints = $constraints;
+    return $this;
   }
 
   /**
@@ -542,6 +539,7 @@ abstract class FieldConfigBase extends ConfigEntityBase implements FieldConfigIn
    */
   public function addConstraint($constraint_name, $options = NULL) {
     $this->constraints[$constraint_name] = $options;
+    return $this;
   }
 
   /**

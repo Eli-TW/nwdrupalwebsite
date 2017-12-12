@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\composer_manager\Unit\PackageManagerTest.
- */
-
 namespace Drupal\Tests\composer_manager\Unit;
 
 use Drupal\composer_manager\PackageManager;
@@ -38,17 +33,26 @@ class PackageManagerTest extends UnitTestCase {
         'require' => [
           'symfony/css-selector' => '2.6.*',
         ],
+        'extra' => [
+          'path' => 'profiles/commerce_kickstart/composer.json',
+        ],
       ],
       'test1' => [
         'name' => 'drupal/test1',
         'require' => [
           'symfony/intl' => '2.6.*',
         ],
+        'extra' => [
+          'path' => 'modules/test1/composer.json',
+        ],
       ],
       'test2' => [
         'name' => 'drupal/test2',
         'require' => [
           'symfony/config' => '2.6.*',
+        ],
+        'extra' => [
+          'path' => 'sites/all/modules/test2/composer.json',
         ],
       ],
     ],
@@ -125,7 +129,7 @@ class PackageManagerTest extends UnitTestCase {
         ],
       ],
     ];
-    $root = vfsStream::setup('drupal', null, $structure);
+    vfsStream::setup('drupal', null, $structure);
 
     $this->manager = new PackageManager('vfs://drupal');
 
@@ -145,6 +149,14 @@ class PackageManagerTest extends UnitTestCase {
   public function testExtensionPackages() {
     $extension_packages = $this->manager->getExtensionPackages();
     $this->assertEquals($this->packages['extension'], $extension_packages);
+  }
+
+  /**
+   * @covers ::getInstalledPackages
+   */
+  public function testInstalledPackages() {
+    $installed_packages = $this->manager->getInstalledPackages();
+    $this->assertEquals($this->packages['installed'], $installed_packages);
   }
 
   /**

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\FileStorage.
- */
-
 namespace Drupal\Core\Config;
 
 use Drupal\Component\Serialization\Yaml;
@@ -80,7 +75,7 @@ class FileStorage implements StorageInterface {
   }
 
   /**
-   * Implements Drupal\Core\Config\StorageInterface::exists().
+   * {@inheritdoc}
    */
   public function exists($name) {
     return file_exists($this->getFilePath($name));
@@ -95,12 +90,13 @@ class FileStorage implements StorageInterface {
     if (!$this->exists($name)) {
       return FALSE;
     }
-    $data = file_get_contents($this->getFilePath($name));
+    $filepath = $this->getFilePath($name);
+    $data = file_get_contents($filepath);
     try {
       $data = $this->decode($data);
     }
     catch (InvalidDataTypeException $e) {
-      throw new UnsupportedDataTypeConfigException("Invalid data type in config $name: {$e->getMessage()}");
+      throw new UnsupportedDataTypeConfigException('Invalid data type in config ' . $name . ', found in file' . $filepath . ' : ' . $e->getMessage());
     }
     return $data;
   }
@@ -146,7 +142,7 @@ class FileStorage implements StorageInterface {
   }
 
   /**
-   * Implements Drupal\Core\Config\StorageInterface::delete().
+   * {@inheritdoc}
    */
   public function delete($name) {
     if (!$this->exists($name)) {
@@ -160,7 +156,7 @@ class FileStorage implements StorageInterface {
   }
 
   /**
-   * Implements Drupal\Core\Config\StorageInterface::rename().
+   * {@inheritdoc}
    */
   public function rename($name, $new_name) {
     $status = @rename($this->getFilePath($name), $this->getFilePath($new_name));
@@ -171,14 +167,14 @@ class FileStorage implements StorageInterface {
   }
 
   /**
-   * Implements Drupal\Core\Config\StorageInterface::encode().
+   * {@inheritdoc}
    */
   public function encode($data) {
     return Yaml::encode($data);
   }
 
   /**
-   * Implements Drupal\Core\Config\StorageInterface::decode().
+   * {@inheritdoc}
    */
   public function decode($raw) {
     $data = Yaml::decode($raw);
@@ -190,7 +186,7 @@ class FileStorage implements StorageInterface {
   }
 
   /**
-   * Implements Drupal\Core\Config\StorageInterface::listAll().
+   * {@inheritdoc}
    */
   public function listAll($prefix = '') {
     $dir = $this->getCollectionDirectory();
@@ -206,8 +202,9 @@ class FileStorage implements StorageInterface {
     $files = scandir($dir);
 
     $names = array();
+    $pattern = '/^' . preg_quote($prefix, '/') . '.*' . preg_quote($extension, '/') . '$/';
     foreach ($files as $file) {
-      if ($file[0] !== '.' && fnmatch($prefix . '*' . $extension, $file)) {
+      if ($file[0] !== '.' && preg_match($pattern, $file)) {
         $names[] = basename($file, $extension);
       }
     }
@@ -216,7 +213,7 @@ class FileStorage implements StorageInterface {
   }
 
   /**
-   * Implements Drupal\Core\Config\StorageInterface::deleteAll().
+   * {@inheritdoc}
    */
   public function deleteAll($prefix = '') {
     $success = TRUE;
@@ -289,6 +286,7 @@ class FileStorage implements StorageInterface {
    */
   protected function getAllCollectionNamesHelper($directory) {
     $collections = array();
+    $pattern = '/\.' . preg_quote($this->getFileExtension(), '/') . '$/';
     foreach (new \DirectoryIterator($directory) as $fileinfo) {
       if ($fileinfo->isDir() && !$fileinfo->isDot()) {
         $collection = $fileinfo->getFilename();
@@ -308,7 +306,7 @@ class FileStorage implements StorageInterface {
         // collection.
         // @see \Drupal\Core\Config\FileStorage::listAll()
         foreach (scandir($directory . '/' . $collection) as $file) {
-          if ($file[0] !== '.' && fnmatch('*.' . $this->getFileExtension(), $file)) {
+          if ($file[0] !== '.' && preg_match($pattern, $file)) {
             $collections[] = $collection;
             break;
           }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Entity\EntityViewDisplay.
- */
-
 namespace Drupal\Core\Entity\Entity;
 
 use Drupal\Component\Utility\NestedArray;
@@ -13,6 +8,7 @@ use Drupal\Core\Entity\EntityDisplayPluginCollection;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\EntityDisplayBase;
+use Drupal\Core\TypedData\TranslatableInterface;
 
 /**
  * Configuration entity that contains display options for all components of a
@@ -249,7 +245,18 @@ class EntityViewDisplay extends EntityDisplayBase implements EntityViewDisplayIn
           $items = $grouped_items[$id];
           /** @var \Drupal\Core\Access\AccessResultInterface $field_access */
           $field_access = $items->access('view', NULL, TRUE);
-          $build_list[$id][$name] = $field_access->isAllowed() ? $formatter->view($items, $entity->language()->getId()) : [];
+          // The language of the field values to display is already determined
+          // in the incoming $entity. The formatter should build its output of
+          // those values using:
+          // - the entity language if the entity is translatable,
+          // - the current "content language" otherwise.
+          if ($entity instanceof TranslatableInterface && $entity->isTranslatable()) {
+            $view_langcode = $entity->language()->getId();
+          }
+          else {
+            $view_langcode = NULL;
+          }
+          $build_list[$id][$name] = $field_access->isAllowed() ? $formatter->view($items, $view_langcode) : [];
           // Apply the field access cacheability metadata to the render array.
           $this->renderer->addCacheableDependency($build_list[$id][$name], $field_access);
         }
@@ -294,4 +301,5 @@ class EntityViewDisplay extends EntityDisplayBase implements EntityViewDisplayIn
       'formatters' => new EntityDisplayPluginCollection($this->pluginManager, $configurations)
     );
   }
+
 }

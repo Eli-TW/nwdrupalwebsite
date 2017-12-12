@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface.
- */
-
 namespace Drupal\Core\Entity\EntityReferenceSelection;
 
 use Drupal\Core\Database\Query\SelectInterface;
@@ -30,7 +25,7 @@ interface SelectionInterface extends PluginFormInterface {
   public function getReferenceableEntities($match = NULL, $match_operator = 'CONTAINS', $limit = 0);
 
   /**
-   * Counts entities that are referenceable by a given field.
+   * Counts entities that are referenceable.
    *
    * @return int
    *   The number of referenceable entities.
@@ -38,7 +33,7 @@ interface SelectionInterface extends PluginFormInterface {
   public function countReferenceableEntities($match = NULL, $match_operator = 'CONTAINS');
 
   /**
-   * Validates that entities can be referenced by this field.
+   * Validates which existing entities can be referenced.
    *
    * @return array
    *   An array of valid entity IDs.

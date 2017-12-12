@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Template\AttributeBoolean.
- */
-
 namespace Drupal\Core\Template;
 
 use Drupal\Component\Utility\Html;
@@ -32,7 +27,7 @@ use Drupal\Component\Utility\Html;
 class AttributeBoolean extends AttributeValueBase {
 
   /**
-   * Overrides AttributeValueBase::render().
+   * {@inheritdoc}
    */
   public function render() {
     return $this->__toString();

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Menu\LocalTaskManager.
- */
-
 namespace Drupal\Core\Menu;
 
 use Drupal\Component\Plugin\Exception\PluginException;
@@ -183,7 +178,7 @@ class LocalTaskManager extends DefaultPluginManager implements LocalTaskManagerI
    * {@inheritdoc}
    */
   public function getDefinitions() {
-    $definitions =  parent::getDefinitions();
+    $definitions = parent::getDefinitions();
 
     $count = 0;
     foreach ($definitions as &$definition) {
@@ -223,7 +218,7 @@ class LocalTaskManager extends DefaultPluginManager implements LocalTaskManagerI
             $definitions[$plugin_id]['base_route'] = $definitions[$task_info['parent_id']]['base_route'];
           }
           if ($route_name == $task_info['route_name']) {
-            if(!empty($task_info['base_route'])) {
+            if (!empty($task_info['base_route'])) {
               $base_routes[$task_info['base_route']] = $task_info['base_route'];
             }
             // Tabs that link to the current route are viable parents
@@ -304,7 +299,9 @@ class LocalTaskManager extends DefaultPluginManager implements LocalTaskManagerI
     }
     // Pre-fetch all routes involved in the tree. This reduces the number
     // of SQL queries that would otherwise be triggered by the access manager.
-    $routes = $route_names ? $this->routeProvider->getRoutesByNames($route_names) : array();
+    if ($route_names) {
+      $this->routeProvider->getRoutesByNames($route_names);
+    }
 
     foreach ($tree as $level => $instances) {
       /** @var $instances \Drupal\Core\Menu\LocalTaskInterface[] */

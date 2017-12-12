@@ -2,9 +2,8 @@ id: d6_field
 label: Field configuration
 migration_tags:
   - Drupal 6
-builder:
-  plugin: d6_cck_migration
-  cck_plugin_method: processField
+class: Drupal\migrate_drupal\Plugin\migrate\CckMigration
+cck_plugin_method: processField
 source:
   plugin: d6_field
   constants:
@@ -17,7 +16,7 @@ process:
   field_name: field_name
   type:
     -
-      plugin: static_map
+      plugin: field_type
       source:
         - type
         - widget_type
@@ -37,12 +36,6 @@ process:
           optionwidgets_select: list_float
           optionwidgets_buttons: list_float
           optionwidgets_onoff: boolean
-        text:
-          optionwidgets_select: list_string
-          optionwidgets_buttons: list_string
-          optionwidgets_onoff: boolean
-          text_textfield: text
-          text_textarea: text_long
         email:
           email_textfield: email
         filefield:
@@ -118,6 +111,9 @@ process:
           phone_textfield: telephone
         int_phone:
           phone_textfield: telephone
+    -
+      plugin: skip_on_empty
+      method: row
   cardinality:
     plugin: static_map
     bypass: true

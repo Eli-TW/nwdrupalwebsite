@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\row\EntityReference.
- */
-
 namespace Drupal\views\Plugin\views\row;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -26,7 +21,7 @@ use Drupal\Core\Form\FormStateInterface;
 class EntityReference extends Fields {
 
   /**
-   * Overrides \Drupal\views\Plugin\views\row\Fields::defineOptions().
+   * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -36,7 +31,7 @@ class EntityReference extends Fields {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\row\Fields::buildOptionsForm().
+   * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
@@ -58,4 +53,5 @@ class EntityReference extends Fields {
 
     return parent::preRender($row);
   }
+
 }

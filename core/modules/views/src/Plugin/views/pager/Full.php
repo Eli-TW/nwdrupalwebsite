@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\pager\Full.
- */
-
 namespace Drupal\views\Plugin\views\pager;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -26,7 +21,7 @@ use Drupal\Core\Form\FormStateInterface;
 class Full extends SqlBase {
 
   /**
-   * Overrides \Drupal\views\Plugin\views\SqlBase::defineOptions().
+   * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -41,7 +36,7 @@ class Full extends SqlBase {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\SqlBase::buildOptionsForm().
+   * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
@@ -69,7 +64,7 @@ class Full extends SqlBase {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\pager\PagerPluginBase::summaryTitle().
+   * {@inheritdoc}
    */
   public function summaryTitle() {
     if (!empty($this->options['offset'])) {
@@ -99,6 +94,5 @@ class Full extends SqlBase {
       '#route_name' => !empty($this->view->live_preview) ? '<current>' : '<none>',
     );
   }
-
 
 }

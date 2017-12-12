@@ -1,15 +1,15 @@
 #block-footer-legal {
   font-size: $small-size;
   line-height: 1.6;
-  
+
   ul {
     margin-bottom: 1em;
   }
-  
+
   p {
     margin: 0;
   }
-  
+
   a {
     color: $colour-font;
     @include text-decoration();
@@ -17,45 +17,155 @@
 }
 
 #block-nwdrupal-main-menu {
-  position: absolute;
-  width: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  
-  .menu {
-    @include list-inline();
-    
-    > li {
-      width: 18%;
-      position: absolute;
-      top: 0;
-      text-align: center;
-      
-      &:nth-child(1) {
-        left: 0;  
-      }
-      &:nth-child(2) {
-        left: 18%;  
-      }
-      &:nth-child(3) {
-        left: 64%;
-      }
-      &:nth-child(4) {
-        left: 82%;
-      }
-      
-      a {
-        color: white;
-        display: block;
-        padding: 0.25em 0;
-        @include text-decoration-plain();
-        border-bottom: 1px solid rgba(white, 0.8);
-      }
-    }
+
+  @include bp("mama-bear") {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
   }
 }
 
 #block-nwdrupal-branding {
-  width: 24%;
-  margin: 0 auto;
+  width: 60%;
+  margin: 0 auto 1rem;
+
+  @include bp("mama-bear") {
+    margin-bottom: 0;
+    width: 29%;
+  }
+}
+
+#block-welcometext {
+  h1 {
+    font-size: $mega-size;
+    font-weight: $bold;
+    margin: 0 0 0.25em 0;
+  }
+
+  p {
+    font-size: $h2-size;
+    margin: 0 0 1.5em 0;
+    line-height: 1.25;
+  }
+}
+
+.node--type-event.node--view-mode-teaser {
+  overflow: hidden;
+  position: relative;
+}
+
+.first-event.node--type-event.node--view-mode-teaser {
+  padding-top: 3.5em;
+
+  @include bp("mama-bear") {
+    padding-top: 21px;
+    padding-right: 2em;
+  }
+
+  &:after {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    display: block;
+    width: 9em;
+    padding: 0.2em 0.5em;
+
+    background-color: forestgreen;
+    color: white;
+
+    font-weight: bold;
+    font-size: 1em;
+    text-align: center;
+    text-transform: uppercase;
+
+    content: "Next Event";
+
+    @include bp("mama-bear") {
+      transform: translateX(30%) rotate(45deg) translateY(-100%);
+      transform-origin: top left;
+    }
+  }
+}
+
+body.path-frontpage div.view-events {
+  article {
+    border: 1px #eee solid;
+    background: white;
+    overflow: hidden;
+    padding-top: 21px;
+    padding-right: 1em;
+    padding-bottom: 23px;
+    padding-left: 1em;
+    margin-bottom: 20px;
+
+    @include bp("mama-bear") {
+      float: left;
+      width: 48%;
+    }
+
+    &.first-event {
+      width: 100%;
+      float: none;
+    }
+
+    &.last-event {
+      margin-left: 4%;
+    }
+  }
+  .view-footer {
+    display: block;
+    clear: both;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+}
+
+div.view-events {
+  article {
+    border: 1px #eee solid;
+    background: white;
+    padding-bottom: 23px;
+    padding-top: 21px;
+    margin-bottom: 20px;
+  }
+}
+
+div.event-data {
+  div {
+    padding: 0.1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background: #f8f8f8;
+    text-align: center;
+  }
+
+  div.event-date {
+    background: #0947aa;
+    color: white;
+    font-size: 1.5rem;
+    margin-top: -0.8rem;
+  }
+
+  div.field--name-field-event-rsvps {
+    width: auto;
+  }
+}
+
+div.event-meetup-advert-block {
+  padding: 40px;
+  background: white;
+  margin-bottom: 20px;
+  border: 1px #eee solid;
+  background-image: url('/themes/nwdrupal/images/meetup_logo_slant.png');
+  background-repeat: no-repeat;
+  text-align: right;
+  font-size: 1.75rem;
+  padding-left: 30rem;
+  font-weight: bold;
+  background-position-y: -8rem;
+  background-position-x: -1rem;
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\TypedData\TranslatableInterface.
- */
-
 namespace Drupal\Core\TypedData;
 
 /**
@@ -27,6 +22,14 @@ interface TranslatableInterface {
    *   TRUE if the translation is the default one, FALSE otherwise.
    */
   public function isDefaultTranslation();
+
+  /**
+   * Checks whether the translation is new.
+   *
+   * @return bool
+   *   TRUE if the translation is new, FALSE otherwise.
+   */
+  public function isNewTranslation();
 
   /**
    * Returns the languages the data is translated to.

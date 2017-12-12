@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Plugin\Discovery\HookDiscovery.
- */
-
 namespace Drupal\Core\Plugin\Discovery;
 
 use Drupal\Component\Plugin\Discovery\DiscoveryInterface;
@@ -47,7 +42,7 @@ class HookDiscovery implements DiscoveryInterface {
   }
 
   /**
-   * Implements Drupal\Component\Plugin\Discovery\DiscoveryInterface::getDefinitions().
+   * {@inheritdoc}
    */
   public function getDefinitions() {
     $definitions = array();
@@ -60,4 +55,5 @@ class HookDiscovery implements DiscoveryInterface {
     }
     return $definitions;
   }
+
 }

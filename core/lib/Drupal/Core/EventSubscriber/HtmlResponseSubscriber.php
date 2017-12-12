@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\EventSubscriber\HtmlResponseSubscriber.
- */
-
 namespace Drupal\Core\EventSubscriber;
 
 use Drupal\Core\Render\HtmlResponse;
@@ -42,10 +37,6 @@ class HtmlResponseSubscriber implements EventSubscriberInterface {
    *   The event to process.
    */
   public function onRespond(FilterResponseEvent $event) {
-    if (!$event->isMasterRequest()) {
-      return;
-    }
-
     $response = $event->getResponse();
     if (!$response instanceof HtmlResponse) {
       return;

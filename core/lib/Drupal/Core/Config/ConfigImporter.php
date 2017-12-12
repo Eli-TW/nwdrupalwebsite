@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\ConfigImporter.
- */
-
 namespace Drupal\Core\Config;
 
 use Drupal\Core\Config\Importer\MissingContentEvent;
@@ -454,10 +449,10 @@ class ConfigImporter {
   /**
    * Imports the changelist to the target storage.
    *
-   * @throws \Drupal\Core\Config\ConfigException
-   *
    * @return \Drupal\Core\Config\ConfigImporter
    *   The ConfigImporter instance.
+   *
+   * @throws \Drupal\Core\Config\ConfigException
    */
   public function import() {
     if ($this->hasUnprocessedConfigurationChanges()) {
@@ -489,14 +484,17 @@ class ConfigImporter {
    */
   public function doSyncStep($sync_step, &$context) {
     if (!is_array($sync_step) && method_exists($this, $sync_step)) {
+      \Drupal::service('config.installer')->setSyncing(TRUE);
       $this->$sync_step($context);
     }
     elseif (is_callable($sync_step)) {
+      \Drupal::service('config.installer')->setSyncing(TRUE);
       call_user_func_array($sync_step, array(&$context, $this));
     }
     else {
       throw new \InvalidArgumentException('Invalid configuration synchronization step');
     }
+    \Drupal::service('config.installer')->setSyncing(FALSE);
   }
 
   /**
@@ -511,8 +509,6 @@ class ConfigImporter {
    *   If the configuration is already importing.
    */
   public function initialize() {
-    $this->createExtensionChangelist();
-
     // Ensure that the changes have been validated.
     $this->validate();
 
@@ -546,10 +542,10 @@ class ConfigImporter {
   /**
    * Processes extensions as a batch operation.
    *
-   * @param array $context.
+   * @param array|\ArrayAccess $context.
    *   The batch context.
    */
-  protected function processExtensions(array &$context) {
+  protected function processExtensions(&$context) {
     $operation = $this->getNextExtensionOperation();
     if (!empty($operation)) {
       $this->processExtension($operation['type'], $operation['op'], $operation['name']);
@@ -566,10 +562,10 @@ class ConfigImporter {
   /**
    * Processes configuration as a batch operation.
    *
-   * @param array $context.
+   * @param array|\ArrayAccess $context.
    *   The batch context.
    */
-  protected function processConfigurations(array &$context) {
+  protected function processConfigurations(&$context) {
     // The first time this is called we need to calculate the total to process.
     // This involves recalculating the changelist which will ensure that if
     // extensions have been processed any configuration affected will be taken
@@ -609,10 +605,10 @@ class ConfigImporter {
   /**
    * Handles processing of missing content.
    *
-   * @param array $context
+   * @param array|\ArrayAccess $context.
    *   Standard batch context.
    */
-  protected function processMissingContent(array &$context) {
+  protected function processMissingContent(&$context) {
     $sandbox = &$context['sandbox']['config'];
     if (!isset($sandbox['missing_content'])) {
       $missing_content = $this->configManager->findMissingContentDependencies();
@@ -641,10 +637,10 @@ class ConfigImporter {
   /**
    * Finishes the batch.
    *
-   * @param array $context.
+   * @param array|\ArrayAccess $context.
    *   The batch context.
    */
-  protected function finish(array &$context) {
+  protected function finish(&$context) {
     $this->eventDispatcher->dispatch(ConfigEvents::IMPORT, new ConfigImporterEvent($this));
     // The import is now complete.
     $this->lock->release(static::LOCK_NAME);
@@ -710,8 +706,10 @@ class ConfigImporter {
    * @throws \Drupal\Core\Config\ConfigImporterException
    *   Exception thrown if the validate event logged any errors.
    */
-  protected function validate() {
+  public function validate() {
     if (!$this->validated) {
+      // Create the list of installs and uninstalls.
+      $this->createExtensionChangelist();
       // Validate renames.
       foreach ($this->getUnprocessedConfiguration('rename') as $name) {
         $names = $this->storageComparer->extractRenameNames($name);
@@ -783,7 +781,6 @@ class ConfigImporter {
     // Set the config installer to use the sync directory instead of the
     // extensions own default config directories.
     \Drupal::service('config.installer')
-      ->setSyncing(TRUE)
       ->setSourceStorage($this->storageComparer->getSourceStorage());
     if ($type == 'module') {
       $this->moduleInstaller->$op(array($name), FALSE);
@@ -810,8 +807,6 @@ class ConfigImporter {
     }
 
     $this->setProcessedExtension($type, $op, $name);
-    \Drupal::service('config.installer')
-      ->setSyncing(FALSE);
   }
 
   /**
@@ -828,10 +823,10 @@ class ConfigImporter {
    * @param string $name
    *   The name of the configuration to process.
    *
-   * @throws \Drupal\Core\Config\ConfigImporterException
-   *
    * @return bool
    *   TRUE is to continue processing, FALSE otherwise.
+   *
+   * @throws \Drupal\Core\Config\ConfigImporterException
    */
   protected function checkOp($collection, $op, $name) {
     if ($op == 'rename') {
@@ -939,13 +934,13 @@ class ConfigImporter {
    * @param string $name
    *   The name of the configuration to process.
    *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   *   Thrown if the data is owned by an entity type, but the entity storage
-   *   does not support imports.
-   *
    * @return bool
    *   TRUE if the configuration was imported as a configuration entity. FALSE
    *   otherwise.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   *   Thrown if the data is owned by an entity type, but the entity storage
+   *   does not support imports.
    */
   protected function importInvokeOwner($collection, $op, $name) {
     // Renames are handled separately.
@@ -989,13 +984,13 @@ class ConfigImporter {
    *   The rename configuration name, as provided by
    *   \Drupal\Core\Config\StorageComparer::createRenameName().
    *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   *   Thrown if the data is owned by an entity type, but the entity storage
-   *   does not support imports.
-   *
    * @return bool
    *   TRUE if the configuration was imported as a configuration entity. FALSE
    *   otherwise.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   *   Thrown if the data is owned by an entity type, but the entity storage
+   *   does not support imports.
    *
    * @see \Drupal\Core\Config\ConfigImporter::createRenameName()
    */

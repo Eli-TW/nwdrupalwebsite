@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\path\Form\PathFormBase.
- */
-
 namespace Drupal\path\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -116,7 +111,7 @@ abstract class PathFormBase extends FormBase {
       '#default_value' => $this->path['alias'],
       '#maxlength' => 255,
       '#size' => 45,
-      '#description' => $this->t('Specify an alternative path by which this data can be accessed. For example, type "/about" when writing an about page. Use a relative path with a slash in front..'),
+      '#description' => $this->t('Specify an alternative path by which this data can be accessed. For example, type "/about" when writing an about page. Use a relative path with a slash in front.'),
       '#field_prefix' => $this->requestContext->getCompleteBaseUrl(),
       '#required' => TRUE,
     );
@@ -151,6 +146,7 @@ abstract class PathFormBase extends FormBase {
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $this->t('Save'),
+      '#button_type' => 'primary',
     );
 
     return $form;
@@ -180,8 +176,22 @@ abstract class PathFormBase extends FormBase {
     $langcode = $form_state->getValue('langcode', LanguageInterface::LANGCODE_NOT_SPECIFIED);
 
     if ($this->aliasStorage->aliasExists($alias, $langcode, $this->path['source'])) {
-      $form_state->setErrorByName('alias', t('The alias %alias is already in use in this language.', array('%alias' => $alias)));
+      $stored_alias = $this->aliasStorage->load(['alias' => $alias, 'langcode' => $langcode]);
+      if ($stored_alias['alias'] !== $alias) {
+        // The alias already exists with different capitalization as the default
+        // implementation of AliasStorageInterface::aliasExists is
+        // case-insensitive.
+        $form_state->setErrorByName('alias', t('The alias %alias could not be added because it is already in use in this language with different capitalization: %stored_alias.', [
+          '%alias' => $alias,
+          '%stored_alias' => $stored_alias['alias'],
+        ]));
+      }
+      else {
+        $form_state->setErrorByName('alias', t('The alias %alias is already in use in this language.', ['%alias' => $alias]));
+      }
     }
+
+
     if (!$this->pathValidator->isValid(trim($source, '/'))) {
       $form_state->setErrorByName('source', t("The path '@link_path' is either invalid or you do not have access to it.", array('@link_path' => $source)));
     }

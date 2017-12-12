@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\row\EntityRow.
- */
-
 namespace Drupal\views\Plugin\views\row;
 
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -131,7 +126,7 @@ class EntityRow extends RowPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\row\RowPluginBase::defineOptions().
+   * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -140,7 +135,7 @@ class EntityRow extends RowPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\row\RowPluginBase::buildOptionsForm().
+   * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
@@ -154,7 +149,7 @@ class EntityRow extends RowPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\PluginBase::summaryTitle().
+   * {@inheritdoc}
    */
   public function summaryTitle() {
     $options = \Drupal::entityManager()->getViewModeOptions($this->entityTypeId);
@@ -185,7 +180,7 @@ class EntityRow extends RowPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\row\RowPluginBase::render().
+   * {@inheritdoc}
    */
   public function render($row) {
     return $this->getEntityTranslationRenderer()->render($row);

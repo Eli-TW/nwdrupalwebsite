@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\locale\Tests\LocaleConfigTranslationImportTest.
- */
-
 namespace Drupal\locale\Tests;
 
 use Drupal\locale\Locale;
@@ -65,7 +60,7 @@ class LocaleConfigTranslationImportTest extends WebTestBase {
     $this->drupalPostForm('admin/reports/translations', array(), t('Update translations'));
 
     // Check if configuration translations have been imported.
-    $override =  \Drupal::languageManager()->getLanguageConfigOverride('af', 'system.maintenance');
+    $override = \Drupal::languageManager()->getLanguageConfigOverride('af', 'system.maintenance');
     $this->assertEqual($override->get('message'), 'Ons is tans besig met onderhoud op @site. Wees asseblief geduldig, ons sal binnekort weer terug wees.');
   }
 
@@ -77,6 +72,10 @@ class LocaleConfigTranslationImportTest extends WebTestBase {
     // Enable locale, block and config_translation modules.
     $this->container->get('module_installer')->install(['block', 'config_translation']);
     $this->resetAll();
+
+    // The testing profile overrides locale.settings to disable translation
+    // import. Test that this override is in place.
+    $this->assertFalse($this->config('locale.settings')->get('translation.import_enabled'), 'Translations imports are disabled by default in the Testing profile.');
 
     $admin_user = $this->drupalCreateUser(array('administer modules', 'administer site configuration', 'administer languages', 'access administration pages', 'administer permissions', 'translate configuration'));
     $this->drupalLogin($admin_user);

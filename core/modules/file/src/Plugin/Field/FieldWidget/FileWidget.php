@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\file\Plugin\Field\FieldWidget\FileWidget.
- */
-
 namespace Drupal\file\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\WidgetBase;
@@ -18,8 +12,9 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\ElementInfoManagerInterface;
 use Drupal\file\Element\ManagedFile;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\file\Entity\File;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * Plugin implementation of the 'file_generic' widget.
@@ -46,7 +41,7 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($plugin_id, $plugin_definition,$configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('element_info'));
+    return new static($plugin_id, $plugin_definition, $configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('element_info'));
   }
 
   /**
@@ -118,7 +113,7 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     }
 
     $title = $this->fieldDefinition->getLabel();
-    $description = FieldFilteredMarkup::create($this->fieldDefinition->getDescription());
+    $description = $this->getFilteredDescription();
 
     $elements = array();
 
@@ -185,7 +180,6 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       $elements['#description'] = $description;
       $elements['#field_name'] = $field_name;
       $elements['#language'] = $items->getLangcode();
-      $elements['#display_field'] = (bool) $this->getFieldSetting('display_field');
       // The field settings include defaults for the field type. However, this
       // widget is a base class for other widgets (e.g., ImageWidget) that may
       // act on field types without these expected settings.
@@ -369,11 +363,6 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $item = $element['#value'];
     $item['fids'] = $element['fids']['#value'];
 
-    // Prevent the file widget from overriding the image widget.
-    if (!isset($element['#theme'])) {
-      $element['#theme'] = 'file_widget';
-    }
-
     // Add the display field if enabled.
     if ($element['#display_field']) {
       $element['display'] = array(
@@ -383,7 +372,8 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       );
       if (isset($item['display'])) {
         $element['display']['#value'] = $item['display'] ? '1' : '';
-      } else {
+      }
+      else {
         $element['display']['#value'] = $element['#display_default'];
       }
     }
@@ -573,6 +563,17 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $field_state = static::getWidgetState($parents, $field_name, $form_state);
     $field_state['items'] = $submitted_values;
     static::setWidgetState($parents, $field_name, $form_state, $field_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function flagErrors(FieldItemListInterface $items, ConstraintViolationListInterface $violations, array $form, FormStateInterface $form_state) {
+    // Never flag validation errors for the remove button.
+    $clicked_button = end($form_state->getTriggeringElement()['#parents']);
+    if ($clicked_button !== 'remove_button') {
+      parent::flagErrors($items, $violations, $form, $form_state);
+    }
   }
 
 }

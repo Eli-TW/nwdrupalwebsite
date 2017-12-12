@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\Plugin\views\argument_default\Tid.
- */
-
 namespace Drupal\taxonomy\Plugin\views\argument_default;
 
 use Drupal\Core\Cache\Cache;
@@ -78,7 +73,7 @@ class Tid extends ArgumentDefaultPluginBase implements CacheableDependencyInterf
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\Plugin\views\PluginBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
@@ -95,6 +90,9 @@ class Tid extends ArgumentDefaultPluginBase implements CacheableDependencyInterf
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
 
@@ -107,6 +105,9 @@ class Tid extends ArgumentDefaultPluginBase implements CacheableDependencyInterf
     return $options;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['term_page'] = array(
       '#type' => 'checkbox',
@@ -165,6 +166,9 @@ class Tid extends ArgumentDefaultPluginBase implements CacheableDependencyInterf
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function submitOptionsForm(&$form, FormStateInterface $form_state, &$options = array()) {
     // Filter unselected items so we don't unnecessarily store giant arrays.
     $options['vids'] = array_filter($options['vids']);
@@ -187,10 +191,10 @@ class Tid extends ArgumentDefaultPluginBase implements CacheableDependencyInterf
         $taxonomy = array();
         foreach ($node->getFieldDefinitions() as $field) {
           if ($field->getType() == 'entity_reference' && $field->getSetting('target_type') == 'taxonomy_term') {
-            foreach ($node->get($field->getName()) as $item) {
-              if (($handler_settings = $field->getSetting('handler_settings')) && isset($handler_settings['target_bundles'])) {
-                $taxonomy[$item->target_id] = reset($handler_settings['target_bundles']);
-              }
+            $taxonomy_terms = $node->{$field->getName()}->referencedEntities();
+            /** @var \Drupal\taxonomy\TermInterface $taxonomy_term */
+            foreach ($taxonomy_terms as $taxonomy_term) {
+              $taxonomy[$taxonomy_term->id()] = $taxonomy_term->getVocabularyId();
             }
           }
         }

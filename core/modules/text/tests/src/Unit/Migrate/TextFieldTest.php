@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\text\Unit\Migrate\TextFieldTest.
- */
-
 namespace Drupal\Tests\text\Unit\Migrate;
 
-use Drupal\migrate\Entity\MigrationInterface;
+use Drupal\migrate\Plugin\MigrationInterface;
+use Drupal\migrate\Row;
 use Drupal\Tests\UnitTestCase;
 use Drupal\text\Plugin\migrate\cckfield\TextField;
 use Prophecy\Argument;
@@ -24,14 +20,14 @@ class TextFieldTest extends UnitTestCase {
   protected $plugin;
 
   /**
-   * @var \Drupal\migrate\Entity\MigrationInterface
+   * @var \Drupal\migrate\Plugin\MigrationInterface
    */
   protected $migration;
 
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp() {
     $this->plugin = new TextField([], 'text', []);
 
     $migration = $this->prophesize(MigrationInterface::class);
@@ -119,6 +115,51 @@ class TextFieldTest extends UnitTestCase {
       ],
     ];
     $this->assertSame($expected, $this->migration->getProcess()['process']);
+  }
+
+  /**
+   * Data provider for testGetFieldType().
+   */
+  public function getFieldTypeProvider() {
+    return array(
+      array('string_long', 'text_textfield', array(
+        'text_processing' => FALSE,
+      )),
+      array('string', 'text_textfield', array(
+        'text_processing' => FALSE,
+        'max_length' => 128,
+      )),
+      array('string_long', 'text_textfield', array(
+        'text_processing' => FALSE,
+        'max_length' => 4096,
+      )),
+      array('text_long', 'text_textfield', array(
+        'text_processing' => TRUE,
+      )),
+      array('text', 'text_textfield', array(
+        'text_processing' => TRUE,
+        'max_length' => 128,
+      )),
+      array('text_long', 'text_textfield', array(
+        'text_processing' => TRUE,
+        'max_length' => 4096,
+      )),
+      array('list_string', 'optionwidgets_buttons'),
+      array('list_string', 'optionwidgets_select'),
+      array('boolean', 'optionwidgets_onoff'),
+      array('text_long', 'text_textarea'),
+      array(NULL, 'undefined'),
+    );
+  }
+
+  /**
+   * @covers ::getFieldType
+   * @dataProvider getFieldTypeProvider
+   */
+  public function testGetFieldType($expected_type, $widget_type, array $settings = array()) {
+    $row = new Row(array('widget_type' => $widget_type), array('widget_type' => array()));
+    $row->setSourceProperty('global_settings', $settings);
+    $this->assertSame($expected_type, $this->plugin->getFieldType($row));
   }
 
 }

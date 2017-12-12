@@ -1,17 +1,18 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\link\Plugin\migrate\cckfield\LinkField.
- */
-
 namespace Drupal\link\Plugin\migrate\cckfield;
 
-use Drupal\migrate\Entity\MigrationInterface;
+use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate_drupal\Plugin\migrate\cckfield\CckFieldPluginBase;
 
 /**
- * @PluginID("link")
+ * @MigrateCckField(
+ *   id = "link",
+ *   core = {6},
+ *   type_map = {
+ *     "link_field" = "link"
+ *   }
+ * )
  */
 class LinkField extends CckFieldPluginBase {
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\Plugin\views\row\Rss.
- */
-
 namespace Drupal\node\Plugin\views\row;
 
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -27,12 +22,12 @@ use Drupal\views\Plugin\views\row\RssPluginBase;
 class Rss extends RssPluginBase {
 
   // Basic properties that let the row style follow relationships.
-  var $base_table = 'node_field_data';
+  public $base_table = 'node_field_data';
 
-  var $base_field = 'nid';
+  public $base_field = 'nid';
 
   // Stores the nodes loaded with preRender.
-  var $nodes = array();
+  public $nodes = array();
 
   /**
    * {@inheritdoc}
@@ -108,8 +103,6 @@ class Rss extends RssPluginBase {
       return;
     }
 
-    $description_build = [];
-
     $node->link = $node->url('canonical', array('absolute' => TRUE));
     $node->rss_namespaces = array();
     $node->rss_elements = array(
@@ -149,13 +142,11 @@ class Rss extends RssPluginBase {
       $this->view->style_plugin->namespaces += $xml_rdf_namespaces;
     }
 
+    $item = new \stdClass();
     if ($display_mode != 'title') {
       // We render node contents.
-      $description_build = $build;
+      $item->description = $build;
     }
-
-    $item = new \stdClass();
-    $item->description = $description_build;
     $item->title = $node->label();
     $item->link = $node->link;
     // Provide a reference so that the render call in

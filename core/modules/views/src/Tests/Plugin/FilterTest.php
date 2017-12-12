@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Tests\Plugin\FilterTest.
- */
-
 namespace Drupal\views\Tests\Plugin;
 
 use Drupal\views\Views;
@@ -39,7 +34,7 @@ class FilterTest extends PluginTestBase {
   }
 
   /**
-   * Overrides Drupal\views\Tests\ViewTestBase::viewsData().
+   * {@inheritdoc}
    */
   protected function viewsData() {
     $data = parent::viewsData();

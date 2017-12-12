@@ -72,6 +72,8 @@ use Drupal\Core\Utility\UpdateException;
  * frequently called should be left in the main module file so that they are
  * always available.
  *
+ * See system_hook_info() for all hook groups defined by Drupal core.
+ *
  * @return
  *   An associative array whose keys are hook names and whose values are an
  *   associative array containing:
@@ -79,9 +81,7 @@ use Drupal\Core\Utility\UpdateException;
  *     system will determine whether a file with the name $module.$group.inc
  *     exists, and automatically load it when required.
  *
- * See system_hook_info() for all hook groups defined by Drupal core.
- *
- * @see hook_hook_info_alter().
+ * @see hook_hook_info_alter()
  */
 function hook_hook_info() {
   $hooks['token_info'] = array(
@@ -197,6 +197,12 @@ function hook_modules_installed($modules) {
  *
  * If the module implements hook_schema(), the database tables will
  * be created before this hook is fired.
+ *
+ * If the module provides a MODULE.routing.yml or alters routing information
+ * these changes will not be available when this hook is fired. If up-to-date
+ * router information is required, for example to use \Drupal\Core\Url, then
+ * (preferably) use hook_modules_installed() or rebuild the router in the
+ * hook_install() implementation.
  *
  * Implementations of this hook are by convention declared in the module's
  * .install file. The implementation can rely on the .module file being loaded.
@@ -588,16 +594,16 @@ function hook_install_tasks_alter(&$tasks, $install_state) {
  * @param array $sandbox
  *   Stores information for batch updates. See above for more information.
  *
+ * @return string|null
+ *   Optionally, update hooks may return a translated string that will be
+ *   displayed to the user after the update has completed. If no message is
+ *   returned, no message will be presented to the user.
+ *
  * @throws \Drupal\Core\Utility\UpdateException|PDOException
  *   In case of error, update hooks should throw an instance of
  *   Drupal\Core\Utility\UpdateException with a meaningful message for the user.
  *   If a database query fails for whatever reason, it will throw a
  *   PDOException.
- *
- * @return string|null
- *   Optionally, update hooks may return a translated string that will be
- *   displayed to the user after the update has completed. If no message is
- *   returned, no message will be presented to the user.
  *
  * @ingroup update_api
  *
@@ -683,16 +689,16 @@ function hook_update_N(&$sandbox) {
  * @param array $sandbox
  *   Stores information for batch updates. See above for more information.
  *
+ * @return string|null
+ *   Optionally, hook_post_update_NAME() hooks may return a translated string
+ *   that will be displayed to the user after the update has completed. If no
+ *   message is returned, no message will be presented to the user.
+ *
  * @throws \Drupal\Core\Utility\UpdateException|PDOException
  *   In case of error, update hooks should throw an instance of
  *   \Drupal\Core\Utility\UpdateException with a meaningful message for the
  *   user. If a database query fails for whatever reason, it will throw a
  *   PDOException.
- *
- * @return string|null
- *   Optionally, hook_post_update_NAME() hooks may return a translated string
- *   that will be displayed to the user after the update has completed. If no
- *   message is returned, no message will be presented to the user.
  *
  * @ingroup update_api
  *
@@ -887,6 +893,9 @@ function hook_updater_info_alter(&$updaters) {
  * Other severity levels have no effect on the installation.
  * Module dependencies do not belong to these installation requirements,
  * but should be defined in the module's .info.yml file.
+ *
+ * During installation (when $phase == 'install'), if you need to load a class
+ * from your module, you'll need to include the class file directly.
  *
  * The 'runtime' phase is not limited to pure installation requirements
  * but can also be used for more general status information like maintenance

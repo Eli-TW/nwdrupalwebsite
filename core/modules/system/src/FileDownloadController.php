@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\FileDownloadController.
- */
-
 namespace Drupal\system;
 
 use Drupal\Core\Controller\ControllerBase;
@@ -35,13 +30,13 @@ class FileDownloadController extends ControllerBase {
    * @param string $scheme
    *   The file scheme, defaults to 'private'.
    *
+   * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+   *   The transferred file as response.
+   *
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    *   Thrown when the requested file does not exist.
    * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
    *   Thrown when the user does not have access to the file.
-   *
-   * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
-   *   The transferred file as response.
    */
   public function download(Request $request, $scheme = 'private') {
     $target = $request->query->get('file');

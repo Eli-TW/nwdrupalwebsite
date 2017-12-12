@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Database\Driver\sqlite\Statement.
- */
-
 namespace Drupal\Core\Database\Driver\sqlite;
 
 use Drupal\Core\Database\StatementPrefetch;
 use Drupal\Core\Database\StatementInterface;
 
 /**
- * Specific SQLite implementation of DatabaseConnection.
+ * SQLite implementation of \Drupal\Core\Database\Statement.
  *
  * The PDO SQLite driver only closes SELECT statements when the PDOStatement
  * destructor is called and SQLite does not allow data change (INSERT,
@@ -146,4 +141,5 @@ class Statement extends StatementPrefetch implements StatementInterface {
 
     return $return;
   }
+
 }

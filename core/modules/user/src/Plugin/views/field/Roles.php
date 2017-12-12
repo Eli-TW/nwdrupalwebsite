@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Plugin\views\field\Roles.
- */
-
 namespace Drupal\user\Plugin\views\field;
 
 use Drupal\Core\Database\Connection;
@@ -55,7 +50,7 @@ class Roles extends PrerenderList {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\field\FieldPluginBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Plugin\ContextAwarePluginBase.
- */
-
 namespace Drupal\Core\Plugin;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
@@ -46,11 +41,11 @@ abstract class ContextAwarePluginBase extends ComponentContextAwarePluginBase im
   /**
    * {@inheritdoc}
    *
-   * @return \Drupal\Core\Plugin\Context\ContextInterface
-   *   The context object.
-   *
    * This code is identical to the Component in order to pick up a different
    * Context class.
+   *
+   * @return \Drupal\Core\Plugin\Context\ContextInterface
+   *   The context object.
    */
   public function getContext($name) {
     // Check for a valid context value.
@@ -93,7 +88,7 @@ abstract class ContextAwarePluginBase extends ComponentContextAwarePluginBase im
   public function setContextMapping(array $context_mapping) {
     if ($this instanceof ConfigurablePluginInterface) {
       $configuration = $this->getConfiguration();
-      $configuration['context_mapping'] = $context_mapping;
+      $configuration['context_mapping'] = array_filter($context_mapping);
       $this->setConfiguration($configuration);
     }
     else {

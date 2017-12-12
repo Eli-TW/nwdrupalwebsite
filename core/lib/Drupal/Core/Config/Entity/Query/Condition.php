@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\Entity\Query\Condition.
- */
-
 namespace Drupal\Core\Config\Entity\Query;
 
 use Drupal\Component\Utility\Unicode;
@@ -20,7 +15,7 @@ use Drupal\Core\Entity\Query\QueryException;
 class Condition extends ConditionBase {
 
   /**
-   * Implements \Drupal\Core\Entity\Query\ConditionInterface::compile().
+   * {@inheritdoc}
    */
   public function compile($configs) {
     $and = strtoupper($this->conjunction) == 'AND';
@@ -86,14 +81,14 @@ class Condition extends ConditionBase {
   }
 
   /**
-   * Implements \Drupal\Core\Entity\Query\ConditionInterface::exists().
+   * {@inheritdoc}
    */
   public function exists($field, $langcode = NULL) {
     return $this->condition($field, NULL, 'IS NOT NULL', $langcode);
   }
 
   /**
-   * Implements \Drupal\Core\Entity\Query\ConditionInterface::notExists().
+   * {@inheritdoc}
    */
   public function notExists($field, $langcode = NULL) {
     return $this->condition($field, NULL, 'IS NULL', $langcode);

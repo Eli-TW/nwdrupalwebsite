@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Plugin\Validation\Constraint\BundleConstraint.
- */
-
 namespace Drupal\Core\Entity\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;
@@ -48,16 +43,17 @@ class BundleConstraint extends Constraint {
   }
 
   /**
-   * Overrides Constraint::getDefaultOption().
+   * {@inheritdoc}
    */
   public function getDefaultOption() {
     return 'bundle';
   }
 
   /**
-   * Overrides Constraint::getRequiredOptions().
+   * {@inheritdoc}
    */
   public function getRequiredOptions() {
     return array('bundle');
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Validation\Plugin\Validation\Constraint\PrimitiveTypeConstraintValidator.
- */
-
 namespace Drupal\Core\Validation\Plugin\Validation\Constraint;
 
 use Drupal\Core\TypedData\Type\BinaryInterface;
@@ -28,7 +23,7 @@ class PrimitiveTypeConstraintValidator extends ConstraintValidator {
   use TypedDataAwareValidatorTrait;
 
   /**
-   * Implements \Symfony\Component\Validator\ConstraintValidatorInterface::validate().
+   * {@inheritdoc}
    */
   public function validate($value, Constraint $constraint) {
 
@@ -82,4 +77,5 @@ class PrimitiveTypeConstraintValidator extends ConstraintValidator {
       ));
     }
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\serialization\Normalizer\ComplexDataNormalizer.
- */
-
 namespace Drupal\serialization\Normalizer;
 
 /**
@@ -27,7 +22,7 @@ class ComplexDataNormalizer extends NormalizerBase {
   protected $supportedInterfaceOrClass = 'Drupal\Core\TypedData\ComplexDataInterface';
 
   /**
-   * Implements \Symfony\Component\Serializer\Normalizer\NormalizerInterface::normalize().
+   * {@inheritdoc}
    */
   public function normalize($object, $format = NULL, array $context = array()) {
     $attributes = array();

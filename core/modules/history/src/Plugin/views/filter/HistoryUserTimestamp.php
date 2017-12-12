@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\history\Plugin\views\filter\HistoryUserTimestamp.
- */
-
 namespace Drupal\history\Plugin\views\filter;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -23,7 +18,7 @@ use Drupal\views\Plugin\views\filter\FilterPluginBase;
 class HistoryUserTimestamp extends FilterPluginBase {
 
   // Don't display empty space where the operator would be.
-  var $no_operator = TRUE;
+  public $no_operator = TRUE;
 
   /**
    * {@inheritdoc}
@@ -81,8 +76,7 @@ class HistoryUserTimestamp extends FilterPluginBase {
 
     $clause = '';
     $clause2 = '';
-    if (\Drupal::moduleHandler()->moduleExists('comment')) {
-      $ces = $this->query->ensureTable('comment_entity_statistics', $this->relationship);
+    if ($ces = $this->query->ensureTable('comment_entity_statistics', $this->relationship)) {
       $clause = ("OR $ces.last_comment_timestamp > (***CURRENT_TIME*** - $limit)");
       $clause2 = "OR $field < $ces.last_comment_timestamp";
     }

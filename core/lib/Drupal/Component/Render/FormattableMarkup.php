@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Component\Render\FormattableMarkup.
- */
-
 namespace Drupal\Component\Render;
 
 use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\UrlHelper;
 
@@ -65,7 +59,7 @@ use Drupal\Component\Utility\UrlHelper;
  * @see \Drupal\Core\StringTranslation\PluralTranslatableMarkup
  * @see \Drupal\Component\Render\FormattableMarkup::placeholderFormat()
  */
-class FormattableMarkup implements MarkupInterface {
+class FormattableMarkup implements MarkupInterface, \Countable {
 
   /**
    * The arguments to replace placeholders with.
@@ -169,9 +163,9 @@ class FormattableMarkup implements MarkupInterface {
    *     wrapped in quotes:
    *     @code
    *     // Secure (with quotes):
-   *     $this->placeholderFormat('<a href=":url">@variable</a>', [':url' => $url, @variable => $variable]);
+   *     $this->placeholderFormat('<a href=":url">@variable</a>', [':url' => $url, '@variable' => $variable]);
    *     // Insecure (without quotes):
-   *     $this->placeholderFormat('<a href=:url>@variable</a>', [':url' => $url, @variable => $variable]);
+   *     $this->placeholderFormat('<a href=:url>@variable</a>', [':url' => $url, '@variable' => $variable]);
    *     @endcode
    *     When ":variable" comes from arbitrary user input, the result is secure,
    *     but not guaranteed to be a valid URL (which means the resulting output
@@ -199,22 +193,21 @@ class FormattableMarkup implements MarkupInterface {
           // Escape if the value is not an object from a class that implements
           // \Drupal\Component\Render\MarkupInterface, for example strings will
           // be escaped.
-          // \Drupal\Component\Utility\SafeMarkup\SafeMarkup::isSafe() may
-          // return TRUE for content that is safe within HTML fragments, but not
-          // within other contexts, so this placeholder type must not be used
-          // within HTML attributes, JavaScript, or CSS.
+          // Strings that are safe within HTML fragments, but not within other
+          // contexts, may still be an instance of
+          // \Drupal\Component\Render\MarkupInterface, so this placeholder type
+          // must not be used within HTML attributes, JavaScript, or CSS.
           $args[$key] = static::placeholderEscape($value);
           break;
 
         case ':':
           // Strip URL protocols that can be XSS vectors.
           $value = UrlHelper::stripDangerousProtocols($value);
-          // Escape unconditionally, without checking
-          // \Drupal\Component\Utility\SafeMarkup\SafeMarkup::isSafe(). This
-          // forces characters that are unsafe for use in an "href" HTML
-          // attribute to be encoded. If a caller wants to pass a value that is
-          // extracted from HTML and therefore is already HTML encoded, it must
-          // invoke
+          // Escape unconditionally, without checking whether the value is an
+          // instance of \Drupal\Component\Render\MarkupInterface. This forces
+          // characters that are unsafe for use in an "href" HTML attribute to
+          // be encoded. If a caller wants to pass a value that is extracted
+          // from HTML and therefore is already HTML encoded, it must invoke
           // \Drupal\Component\Render\OutputStrategyInterface::renderFromHtml()
           // on it prior to passing it in as a placeholder value of this type.
           // @todo Add some advice and stronger warnings.
@@ -223,13 +216,22 @@ class FormattableMarkup implements MarkupInterface {
           break;
 
         case '%':
-        default:
           // Similarly to @, escape non-safe values. Also, add wrapping markup
           // in order to render as a placeholder. Not for use within attributes,
           // per the warning above about
-          // \Drupal\Component\Utility\SafeMarkup\SafeMarkup::isSafe() and also
-          // due to the wrapping markup.
+          // \Drupal\Component\Render\MarkupInterface and also due to the
+          // wrapping markup.
           $args[$key] = '<em class="placeholder">' . static::placeholderEscape($value) . '</em>';
+          break;
+
+        default:
+          // We do not trigger an error for placeholder that start with an
+          // alphabetic character.
+          if (!ctype_alpha($key[0])) {
+            // We trigger an error as we may want to introduce new placeholders
+            // in the future without breaking backward compatibility.
+            trigger_error('Invalid placeholder (' . $key . ') in string: ' . $string, E_USER_ERROR);
+          }
           break;
       }
     }
@@ -247,7 +249,7 @@ class FormattableMarkup implements MarkupInterface {
    *   The properly escaped replacement value.
    */
   protected static function placeholderEscape($value) {
-    return SafeMarkup::isSafe($value) ? (string) $value : Html::escape($value);
+    return $value instanceof MarkupInterface ? (string) $value : Html::escape($value);
   }
 
 }

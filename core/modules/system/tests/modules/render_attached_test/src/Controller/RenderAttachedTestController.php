@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\render_attached_test\Controller\TestController.
- */
-
 namespace Drupal\render_attached_test\Controller;
 
 /**

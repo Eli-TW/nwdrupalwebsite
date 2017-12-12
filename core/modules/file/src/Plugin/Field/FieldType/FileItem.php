@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\file\Plugin\Field\FieldType\FileItem.
- */
-
 namespace Drupal\file\Plugin\Field\FieldType;
 
 use Drupal\Component\Utility\Bytes;
@@ -28,7 +23,7 @@ use Drupal\Core\TypedData\DataDefinition;
  *   default_widget = "file_generic",
  *   default_formatter = "file_default",
  *   list_class = "\Drupal\file\Plugin\Field\FieldType\FileFieldItemList",
- *   constraints = {"ValidReference" = {}, "ReferenceAccess" = {}}
+ *   constraints = {"ReferenceAccess" = {}, "FileValidation" = {}}
  * )
  */
 class FileItem extends EntityReferenceItem {

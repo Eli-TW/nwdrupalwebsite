@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\locale\PoDatabaseWriter.
- */
-
 namespace Drupal\locale;
 
 use Drupal\Component\Gettext\PoHeader;
@@ -68,14 +63,14 @@ class PoDatabaseWriter implements PoWriterInterface {
   }
 
   /**
-   * Implements Drupal\Component\Gettext\PoMetadataInterface::getLangcode().
+   * {@inheritdoc}
    */
   public function getLangcode() {
     return $this->langcode;
   }
 
   /**
-   * Implements Drupal\Component\Gettext\PoMetadataInterface::setLangcode().
+   * {@inheritdoc}
    */
   public function setLangcode($langcode) {
     $this->langcode = $langcode;
@@ -130,7 +125,7 @@ class PoDatabaseWriter implements PoWriterInterface {
   }
 
   /**
-   * Implements Drupal\Component\Gettext\PoMetadataInterface::getHeader().
+   * {@inheritdoc}
    */
   public function getHeader() {
     return $this->header;
@@ -179,7 +174,7 @@ class PoDatabaseWriter implements PoWriterInterface {
   }
 
   /**
-   * Implements Drupal\Component\Gettext\PoWriterInterface::writeItem().
+   * {@inheritdoc}
    */
   public function writeItem(PoItem $item) {
     if ($item->isPlural()) {
@@ -190,7 +185,7 @@ class PoDatabaseWriter implements PoWriterInterface {
   }
 
   /**
-   * Implements Drupal\Component\Gettext\PoWriterInterface::writeItems().
+   * {@inheritdoc}
    */
   public function writeItems(PoReaderInterface $reader, $count = -1) {
     $forever = $count == -1;

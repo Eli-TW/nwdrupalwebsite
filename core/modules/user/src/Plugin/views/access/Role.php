@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Plugin\views\access\Role.
- */
-
 namespace Drupal\user\Plugin\views\access;
 
 use Drupal\Core\Cache\Cache;
@@ -30,7 +25,7 @@ use Drupal\Core\Session\AccountInterface;
 class Role extends AccessPluginBase implements CacheableDependencyInterface {
 
   /**
-   * Overrides Drupal\views\Plugin\Plugin::$usesOptions.
+   * {@inheritdoc}
    */
   protected $usesOptions = TRUE;
 
@@ -168,4 +163,3 @@ class Role extends AccessPluginBase implements CacheableDependencyInterface {
   }
 
 }
-

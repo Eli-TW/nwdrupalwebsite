@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Validation\Plugin\Validation\Constraint\LengthConstraint.
- */
-
 namespace Drupal\Core\Validation\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraints\Length;
@@ -29,9 +24,10 @@ class LengthConstraint extends Length {
   public $exactMessage = 'This value should have exactly %limit character.|This value should have exactly %limit characters.';
 
   /**
-   * Overrides Range::validatedBy().
+   * {@inheritdoc}
    */
   public function validatedBy() {
     return '\Symfony\Component\Validator\Constraints\LengthValidator';
   }
+
 }

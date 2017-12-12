@@ -10,9 +10,11 @@ use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Core\Render\Markup;
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Utility\Error;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Minimum supported version of PHP.
@@ -200,7 +202,6 @@ function drupal_get_filename($type, $name, $filename = NULL) {
 
   // Profiles are converted into modules in system_rebuild_module_data().
   // @todo Remove false-exposure of profiles as modules.
-  $original_type = $type;
   if ($type == 'profile') {
     $type = 'module';
   }
@@ -258,71 +259,55 @@ function drupal_get_path($type, $name) {
 /**
  * Translates a string to the current language or to a given language.
  *
- * The t() function serves two purposes. First, at run-time it translates
- * user-visible text into the appropriate language. Second, various mechanisms
- * that figure out what text needs to be translated work off t() -- the text
- * inside t() calls is added to the database of strings to be translated.
- * These strings are expected to be in English, so the first argument should
- * always be in English. To enable a fully-translatable site, it is important
- * that all human-readable text that will be displayed on the site or sent to
- * a user is passed through the t() function, or a related function. See the
- * @link https://www.drupal.org/node/322729 Localization API @endlink pages for
- * more information, including recommendations on how to break up or not
- * break up strings for translation.
+ * In order for strings to be localized, make them available in one of the ways
+ * supported by the @link i18n Localization API. @endlink When possible, use
+ * the \Drupal\Core\StringTranslation\StringTranslationTrait $this->t().
+ * Otherwise create a new \Drupal\Core\StringTranslation\TranslatableMarkup
+ * object directly.
  *
- * @section sec_translating_vars Translating Variables
- * You should never use t() to translate variables, such as calling t($text)
- * unless the text that the variable holds has been passed through t()
- * elsewhere (e.g., $text is one of several translated literal strings in an
- * array). It is especially important never to call t($user_text) where
- * $user_text is some text that a user entered - doing that can lead to
- * cross-site scripting and other security problems. However, you can use
- * variable substitution in your string, to put variable text such as user
- * names or link URLs into translated text. Variable substitution looks like
- * this:
- * @code
- * $text = t("@name's blog", array('@name' => $account->getDisplayName()));
- * @endcode
- * Basically, you can put variables like @name into your string, and t() will
- * substitute their sanitized values at translation time. (See the
- * Localization API pages referenced above and the documentation of
- * \Drupal\Component\Utility\SafeMarkup::format() for details about how to
- * define variables in your string.). Translators can then rearrange the string
- * as necessary for the language (e.g., in Spanish, it might be "blog de
- * @name").
+ * See \Drupal\Core\StringTranslation\TranslatableMarkup::__construct() for
+ * important security information and usage guidelines.
  *
- * @param $string
- *   A string containing the English string to translate.
- * @param $args
- *   An associative array of replacements to make after translation. Based
- *   on the first character of the key, the value is escaped and/or themed.
- *   See \Drupal\Component\Utility\SafeMarkup::format() for details.
- * @param $options
- *   An associative array of additional options, with the following elements:
- *   - 'langcode' (defaults to the current language): The language code to
+ * @param string $string
+ *   A string containing the English text to translate.
+ * @param array $args
+ *   (optional) An associative array of replacements to make after translation.
+ *   Based on the first character of the key, the value is escaped and/or
+ *   themed. See
+ *   \Drupal\Component\Render\FormattableMarkup::placeholderFormat() for
+ *   details.
+ * @param array $options
+ *   (optional) An associative array of additional options, with the following
+ *   elements:
+ *   - 'langcode' (defaults to the current language): A language code, to
  *     translate to a language other than what is used to display the page.
  *   - 'context' (defaults to the empty context): The context the source string
- *     belongs to.
+ *     belongs to. See the @link i18n Internationalization topic @endlink for
+ *     more information about string contexts.
  *
- * @return
- *   The translated string.
+ * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+ *   An object that, when cast to a string, returns the translated string.
  *
- * @see \Drupal\Component\Utility\SafeMarkup::format()
+ * @see \Drupal\Component\Render\FormattableMarkup::placeholderFormat()
+ * @see \Drupal\Core\StringTranslation\StringTranslationTrait::t()
+ * @see \Drupal\Core\StringTranslation\TranslatableMarkup::__construct()
+ *
  * @ingroup sanitization
  */
 function t($string, array $args = array(), array $options = array()) {
-  return \Drupal::translation()->translate($string, $args, $options);
+  return new TranslatableMarkup($string, $args, $options);
 }
 
 /**
  * Formats a string for HTML display by replacing variable placeholders.
  *
- * @see \Drupal\Component\Utility\SafeMarkup::format()
+ * @see \Drupal\Component\Render\FormattableMarkup::placeholderFormat()
+ * @see \Drupal\Component\Render\FormattableMarkup
  * @see t()
  * @ingroup sanitization
  *
  * @deprecated in Drupal 8.0.0, will be removed before Drupal 9.0.0.
- *   Use \Drupal\Component\Utility\SafeMarkup::format().
+ *   Use \Drupal\Component\Render\FormattableMarkup.
  */
 function format_string($string, array $args) {
   return SafeMarkup::format($string, $args);
@@ -349,7 +334,7 @@ function format_string($string, array $args) {
  * @param $text
  *   The text to check.
  *
- * @return
+ * @return bool
  *   TRUE if the text is valid UTF-8, FALSE if not.
  *
  * @see \Drupal\Component\Utility\Unicode::validateUtf8()
@@ -459,7 +444,7 @@ function drupal_set_message($message = NULL, $type = 'status', $repeat = FALSE) 
     }
 
     // Convert strings which are safe to the simplest Markup objects.
-    if (!($message instanceof Markup) && SafeMarkup::isSafe($message)) {
+    if (!($message instanceof Markup) && $message instanceof MarkupInterface) {
       $message = Markup::create((string) $message);
     }
 
@@ -582,7 +567,7 @@ function _drupal_exception_handler($exception) {
   catch (\Throwable $error) {
     _drupal_exception_handler_additional($exception, $error);
   }
-  // In order to be compatibile with PHP 5 we also catch regular Exceptions.
+  // In order to be compatible with PHP 5 we also catch regular Exceptions.
   catch (\Exception $exception2) {
     _drupal_exception_handler_additional($exception, $exception2);
   }
@@ -636,9 +621,9 @@ function drupal_valid_test_ua($new_prefix = NULL) {
   // string.
   $http_user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : NULL;
   $user_agent = isset($_COOKIE['SIMPLETEST_USER_AGENT']) ? $_COOKIE['SIMPLETEST_USER_AGENT'] : $http_user_agent;
-  if (isset($user_agent) && preg_match("/^(simpletest\d+);(.+);(.+);(.+)$/", $user_agent, $matches)) {
+  if (isset($user_agent) && preg_match("/^(simpletest\d+):(.+):(.+):(.+)$/", $user_agent, $matches)) {
     list(, $prefix, $time, $salt, $hmac) = $matches;
-    $check_string =  $prefix . ';' . $time . ';' . $salt;
+    $check_string = $prefix . ':' . $time . ':' . $salt;
     // Read the hash salt prepared by drupal_generate_test_ua().
     // This function is called before settings.php is read and Drupal's error
     // handlers are set up. While Drupal's error handling may be properly
@@ -695,8 +680,8 @@ function drupal_generate_test_ua($prefix) {
   }
   // Generate a moderately secure HMAC based on the database credentials.
   $salt = uniqid('', TRUE);
-  $check_string = $prefix . ';' . time() . ';' . $salt;
-  return $check_string . ';' . Crypt::hmacBase64($check_string, $key);
+  $check_string = $prefix . ':' . time() . ':' . $salt;
+  return $check_string . ':' . Crypt::hmacBase64($check_string, $key);
 }
 
 /**
@@ -998,7 +983,7 @@ function _drupal_shutdown_function() {
   catch (\Throwable $error) {
     _drupal_shutdown_function_handle_exception($error);
   }
-  // In order to be compatibile with PHP 5 we also catch regular Exceptions.
+  // In order to be compatible with PHP 5 we also catch regular Exceptions.
   catch (\Exception $exception) {
     _drupal_shutdown_function_handle_exception($exception);
   }

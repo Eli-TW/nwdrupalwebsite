@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\style\EntityReference.
- */
-
 namespace Drupal\views\Plugin\views\style;
 
 use Drupal\Component\Utility\Xss;
@@ -27,22 +22,22 @@ use Drupal\Core\Form\FormStateInterface;
 class EntityReference extends StylePluginBase {
 
   /**
-   * Overrides \Drupal\views\Plugin\views\style\StylePluginBase::usesRowPlugin.
+   * {@inheritdoc}
    */
   protected $usesRowPlugin = TRUE;
 
   /**
-   * Overrides \Drupal\views\Plugin\views\style\StylePluginBase::usesFields.
+   * {@inheritdoc}
    */
   protected $usesFields = TRUE;
 
   /**
-   * Overrides \Drupal\views\Plugin\views\style\StylePluginBase::usesGrouping.
+   * {@inheritdoc}
    */
   protected $usesGrouping = FALSE;
 
   /**
-   * Overrides \Drupal\views\Plugin\views\style\StylePluginBase\StylePluginBase::defineOptions().
+   * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -52,7 +47,7 @@ class EntityReference extends StylePluginBase {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\style\StylePluginBase\StylePluginBase::buildOptionsForm().
+   * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
@@ -70,7 +65,7 @@ class EntityReference extends StylePluginBase {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\style\StylePluginBase\StylePluginBase::render().
+   * {@inheritdoc}
    */
   public function render() {
     if (!empty($this->view->live_preview)) {
@@ -105,4 +100,5 @@ class EntityReference extends StylePluginBase {
   public function evenEmpty() {
     return TRUE;
   }
+
 }

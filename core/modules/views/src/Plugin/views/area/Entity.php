@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\area\Entity.
- */
-
 namespace Drupal\views\Plugin\views\area;
 
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -67,7 +62,7 @@ class Entity extends TokenizeAreaPluginBase {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\area\AreaPluginBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
@@ -199,4 +194,5 @@ class Entity extends TokenizeAreaPluginBase {
 
     return $dependencies;
   }
+
 }

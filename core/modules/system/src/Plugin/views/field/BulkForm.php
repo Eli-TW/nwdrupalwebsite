@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Plugin\views\field\BulkForm.
- */
-
 namespace Drupal\system\Plugin\views\field;
 
 use Drupal\Core\Cache\CacheableDependencyInterface;
@@ -399,7 +394,7 @@ class BulkForm extends FieldPluginBase implements CacheableDependencyInterface {
    * Returns the message to be displayed when there are no selected items.
    *
    * @return string
-   *  Message displayed when no items are selected.
+   *   Message displayed when no items are selected.
    */
   protected function emptySelectedMessage() {
     return $this->t('No items selected.');
@@ -464,7 +459,11 @@ class BulkForm extends FieldPluginBase implements CacheableDependencyInterface {
       $key_parts[] = $entity->getRevisionId();
     }
 
-    return implode('-', $key_parts);
+    // An entity ID could be an arbitrary string (although they are typically
+    // numeric). JSON then Base64 encoding ensures the bulk_form_key is
+    // safe to use in HTML, and that the key parts can be retrieved.
+    $key = json_encode($key_parts);
+    return base64_encode($key);
   }
 
   /**
@@ -479,7 +478,8 @@ class BulkForm extends FieldPluginBase implements CacheableDependencyInterface {
    *   as part of the bulk form key.
    */
   protected function loadEntityFromBulkFormKey($bulk_form_key) {
-    $key_parts = explode('-', $bulk_form_key);
+    $key = base64_decode($bulk_form_key);
+    $key_parts = json_decode($key);
     $revision_id = NULL;
 
     // If there are 3 items, vid will be last.

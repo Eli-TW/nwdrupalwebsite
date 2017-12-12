@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\block_content\Tests\BlockContentTypeTest.
- */
-
 namespace Drupal\block_content\Tests;
 
 use Drupal\block_content\Entity\BlockContentType;
@@ -51,7 +46,7 @@ class BlockContentTypeTest extends BlockContentTestBase {
    * Tests creating a block type programmatically and via a form.
    */
   public function testBlockContentTypeCreation() {
-    // Login a test user.
+    // Log in a test user.
     $this->drupalLogin($this->adminUser);
 
     // Test the page with no block-types.
@@ -185,17 +180,15 @@ class BlockContentTypeTest extends BlockContentTestBase {
       ->getStorage('block_content');
 
     // Install all themes.
-    \Drupal::service('theme_handler')->install(array('bartik', 'seven'));
-    $themes = array('bartik', 'seven', 'classy');
+    \Drupal::service('theme_handler')->install(['bartik', 'seven', 'stark']);
     $theme_settings = $this->config('system.theme');
-    foreach ($themes as $default_theme) {
+    foreach (['bartik', 'seven', 'stark'] as $default_theme) {
       // Change the default theme.
       $theme_settings->set('default', $default_theme)->save();
       \Drupal::service('router.builder')->rebuild();
 
       // For each installed theme, go to its block page and test the redirects.
-      $themes = array('bartik', 'classy', 'seven');
-      foreach ($themes as $theme) {
+      foreach (['bartik', 'seven', 'stark'] as $theme) {
         // Test that adding a block from the 'place blocks' form sends you to the
         // block configure form.
         $path = $theme == $default_theme ? 'admin/structure/block' : "admin/structure/block/list/$theme";

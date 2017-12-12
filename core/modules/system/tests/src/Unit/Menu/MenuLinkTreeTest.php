@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\system\Unit\Menu\MenuLinkTreeTest.
- */
-
 namespace Drupal\Tests\system\Unit\Menu;
 
 use Drupal\Core\Access\AccessResult;
@@ -135,6 +130,7 @@ class MenuLinkTreeTest extends UnitTestCase {
         'max-age' => Cache::PERMANENT,
       ],
       '#sorted' => TRUE,
+      '#menu_name' => 'mock',
       '#theme' => 'menu__mock',
       '#items' => [
         // To be filled when generating test cases, using $get_built_element().

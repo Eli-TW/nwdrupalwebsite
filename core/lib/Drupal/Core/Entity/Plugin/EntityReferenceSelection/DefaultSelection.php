@@ -1,16 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection.
- */
-
 namespace Drupal\Core\Entity\Plugin\EntityReferenceSelection;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionWithAutocreateInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
@@ -18,6 +14,7 @@ use Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\user\EntityOwnerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -40,7 +37,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   deriver = "Drupal\Core\Entity\Plugin\Derivative\DefaultSelectionDeriver"
  * )
  */
-class DefaultSelection extends PluginBase implements SelectionInterface, ContainerFactoryPluginInterface {
+class DefaultSelection extends PluginBase implements SelectionInterface, SelectionWithAutocreateInterface, ContainerFactoryPluginInterface {
 
   /**
    * The entity manager.
@@ -120,6 +117,7 @@ class DefaultSelection extends PluginBase implements SelectionInterface, Contain
         'field' => '_none',
       ),
       'auto_create' => FALSE,
+      'auto_create_bundle' => NULL,
     );
 
     if ($entity_type->hasKey('bundle')) {
@@ -127,6 +125,7 @@ class DefaultSelection extends PluginBase implements SelectionInterface, Contain
       foreach ($bundles as $bundle_name => $bundle_info) {
         $bundle_options[$bundle_name] = $bundle_info['label'];
       }
+      natsort($bundle_options);
 
       $form['target_bundles'] = array(
         '#type' => 'checkboxes',
@@ -137,7 +136,19 @@ class DefaultSelection extends PluginBase implements SelectionInterface, Contain
         '#size' => 6,
         '#multiple' => TRUE,
         '#element_validate' => [[get_class($this), 'elementValidateFilter']],
+        '#ajax' => TRUE,
+        '#limit_validation_errors' => [],
       );
+
+      $form['target_bundles_update'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Update form'),
+        '#limit_validation_errors' => [],
+        '#attributes' => [
+          'class' => ['js-hide'],
+        ],
+        '#submit' => [[EntityReferenceItem::class, 'settingsAjaxSubmit']],
+      ];
     }
     else {
       $form['target_bundles'] = array(
@@ -205,6 +216,30 @@ class DefaultSelection extends PluginBase implements SelectionInterface, Contain
       }
     }
 
+    $form['auto_create'] = array(
+      '#type' => 'checkbox',
+      '#title' => $this->t("Create referenced entities if they don't already exist"),
+      '#default_value' => $selection_handler_settings['auto_create'],
+      '#weight' => -2,
+    );
+
+    if ($entity_type->hasKey('bundle')) {
+      $bundles = array_intersect_key($bundle_options, array_filter((array) $selection_handler_settings['target_bundles']));
+      $form['auto_create_bundle'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Store new items in'),
+        '#options' => $bundles,
+        '#default_value' => $selection_handler_settings['auto_create_bundle'],
+        '#access' => count($bundles) > 1,
+        '#states' => [
+          'visible' => [
+            ':input[name="settings[handler_settings][auto_create]"]' => ['checked' => TRUE],
+          ],
+        ],
+        '#weight' => -1,
+      ];
+    }
+
     return $form;
   }
 
@@ -219,6 +254,10 @@ class DefaultSelection extends PluginBase implements SelectionInterface, Contain
     if ($form_state->getValue(['settings', 'handler_settings', 'target_bundles']) === []) {
       $form_state->setValue(['settings', 'handler_settings', 'target_bundles'], NULL);
     }
+
+    // Don't store the 'target_bundles_update' button value into the field
+    // config settings.
+    $form_state->unsetValue(['settings', 'handler_settings', 'target_bundles_update']);
   }
 
   /**
@@ -252,10 +291,10 @@ class DefaultSelection extends PluginBase implements SelectionInterface, Contain
     }
 
     $options = array();
-    $entities = entity_load_multiple($target_type, $result);
+    $entities = $this->entityManager->getStorage($target_type)->loadMultiple($result);
     foreach ($entities as $entity_id => $entity) {
       $bundle = $entity->bundle();
-      $options[$bundle][$entity_id] = Html::escape($entity->label());
+      $options[$bundle][$entity_id] = Html::escape($this->entityManager->getTranslationFromContext($entity)->label());
     }
 
     return $options;
@@ -286,6 +325,38 @@ class DefaultSelection extends PluginBase implements SelectionInterface, Contain
     }
 
     return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createNewEntity($entity_type_id, $bundle, $label, $uid) {
+    $entity_type = $this->entityManager->getDefinition($entity_type_id);
+    $bundle_key = $entity_type->getKey('bundle');
+    $label_key = $entity_type->getKey('label');
+
+    $entity = $this->entityManager->getStorage($entity_type_id)->create(array(
+      $bundle_key => $bundle,
+      $label_key => $label,
+    ));
+
+    if ($entity instanceof EntityOwnerInterface) {
+      $entity->setOwnerId($uid);
+    }
+
+    return $entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateReferenceableNewEntities(array $entities) {
+    return array_filter($entities, function ($entity) {
+      if (isset($this->configuration['handler_settings']['target_bundles'])) {
+        return in_array($entity->bundle(), $this->configuration['handler_settings']['target_bundles']);
+      }
+      return TRUE;
+    });
   }
 
   /**

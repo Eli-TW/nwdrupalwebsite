@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\Tests\AggregatorTestBase.
- */
-
 namespace Drupal\aggregator\Tests;
 
 use Drupal\aggregator\Entity\Feed;
@@ -137,7 +132,7 @@ abstract class AggregatorTestBase extends WebTestBase {
       'url' => $feed_url,
       'refresh' => '900',
     );
-    return entity_create('aggregator_feed', $values);
+    return Feed::create($values);
   }
 
   /**
@@ -166,7 +161,7 @@ abstract class AggregatorTestBase extends WebTestBase {
   public function updateFeedItems(FeedInterface $feed, $expected_count = NULL) {
     // First, let's ensure we can get to the rss xml.
     $this->drupalGet($feed->getUrl());
-    $this->assertResponse(200, format_string('!url is reachable.', array('!url' => $feed->getUrl())));
+    $this->assertResponse(200, format_string(':url is reachable.', array(':url' => $feed->getUrl())));
 
     // Attempt to access the update link directly without an access token.
     $this->drupalGet('admin/config/services/aggregator/update/' . $feed->id());
@@ -375,4 +370,5 @@ EOF;
       ))
       ->save();
   }
+
 }

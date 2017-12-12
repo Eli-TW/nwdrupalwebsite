@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Plugin\views\argument_default\CurrentUser.
- */
-
 namespace Drupal\user\Plugin\views\argument_default;
 
 use Drupal\Core\Cache\Cache;
@@ -23,6 +18,9 @@ use Drupal\views\Plugin\views\argument_default\ArgumentDefaultPluginBase;
  */
 class CurrentUser extends ArgumentDefaultPluginBase implements CacheableDependencyInterface {
 
+  /**
+   * {@inheritdoc}
+   */
   public function getArgument() {
     return \Drupal::currentUser()->id();
   }

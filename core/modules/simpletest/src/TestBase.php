@@ -1,29 +1,26 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\simpletest\TestBase.
- */
-
 namespace Drupal\simpletest;
 
+use Drupal\Component\Assertion\Handle;
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Config\ConfigImporter;
 use Drupal\Core\Config\StorageComparer;
-use Drupal\Core\Database\ConnectionNotDefinedException;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StreamWrapper\PublicStream;
+use Drupal\Core\Test\TestDatabase;
 use Drupal\Core\Utility\Error;
+use Drupal\Tests\RandomGeneratorTrait;
+use Drupal\Tests\SessionTestTrait;
 
 /**
  * Base class for Drupal tests.
  *
- * Do not extend this class directly; use either
- * \Drupal\simpletest\WebTestBase or \Drupal\simpletest\KernelTestBase.
+ * Do not extend this class directly; use \Drupal\simpletest\WebTestBase.
  */
 abstract class TestBase {
 
@@ -96,7 +93,7 @@ abstract class TestBase {
   /**
    * Incrementing identifier for verbose output filenames.
    *
-   * @var integer
+   * @var int
    */
   protected $verboseId = 0;
 
@@ -314,7 +311,7 @@ abstract class TestBase {
    * HTTP authentication method (specified as a CURLAUTH_* constant).
    *
    * @var int
-   * @see http://php.net/manual/en/function.curl-setopt.php
+   * @see http://php.net/manual/function.curl-setopt.php
    */
   protected $httpAuthMethod = CURLAUTH_BASIC;
 
@@ -512,26 +509,7 @@ abstract class TestBase {
    *   The database connection to use for inserting assertions.
    */
   public static function getDatabaseConnection() {
-    // Check whether there is a test runner connection.
-    // @see run-tests.sh
-    // @todo Convert Simpletest UI runner to create + use this connection, too.
-    try {
-      $connection = Database::getConnection('default', 'test-runner');
-    }
-    catch (ConnectionNotDefinedException $e) {
-      // Check whether there is a backup of the original default connection.
-      // @see TestBase::prepareEnvironment()
-      try {
-        $connection = Database::getConnection('default', 'simpletest_original_default');
-      }
-      catch (ConnectionNotDefinedException $e) {
-        // If TestBase::prepareEnvironment() or TestBase::restoreEnvironment()
-        // failed, the test-specific database connection does not exist
-        // yet/anymore, so fall back to the default of the (UI) test runner.
-        $connection = Database::getConnection('default', 'default');
-      }
-    }
-    return $connection;
+    return TestDatabase::getConnection();
   }
 
   /**
@@ -821,13 +799,49 @@ abstract class TestBase {
    * @return bool
    *   TRUE if the assertion succeeded, FALSE otherwise.
    *
-   * @see TestBase::prepareEnvironment()
+   * @see \Drupal\simpletest\TestBase::prepareEnvironment()
    * @see \Drupal\Core\DrupalKernel::bootConfiguration()
    */
   protected function assertNoErrorsLogged() {
     // Since PHP only creates the error.log file when an actual error is
     // triggered, it is sufficient to check whether the file exists.
     return $this->assertFalse(file_exists(DRUPAL_ROOT . '/' . $this->siteDirectory . '/error.log'), 'PHP error.log is empty.');
+  }
+
+  /**
+   * Asserts that a specific error has been logged to the PHP error log.
+   *
+   * @param string $error_message
+   *   The expected error message.
+   *
+   * @return bool
+   *   TRUE if the assertion succeeded, FALSE otherwise.
+   *
+   * @see \Drupal\simpletest\TestBase::prepareEnvironment()
+   * @see \Drupal\Core\DrupalKernel::bootConfiguration()
+   */
+  protected function assertErrorLogged($error_message) {
+    $error_log_filename = DRUPAL_ROOT . '/' . $this->siteDirectory . '/error.log';
+    if (!file_exists($error_log_filename)) {
+      $this->error('No error logged yet.');
+    }
+
+    $content = file_get_contents($error_log_filename);
+    $rows = explode(PHP_EOL, $content);
+
+    // We iterate over the rows in order to be able to remove the logged error
+    // afterwards.
+    $found = FALSE;
+    foreach ($rows as $row_index => $row) {
+      if (strpos($content, $error_message) !== FALSE) {
+        $found = TRUE;
+        unset($rows[$row_index]);
+      }
+    }
+
+    file_put_contents($error_log_filename, implode("\n", $rows));
+
+    return $this->assertTrue($found, sprintf('The %s error message was logged.', $error_message));
   }
 
   /**
@@ -919,7 +933,7 @@ abstract class TestBase {
     }
 
     $message = '<hr />ID #' . $this->verboseId . ' (<a href="' . $this->verboseClassName . '-' . ($this->verboseId - 1) . '-' . $this->testId . '.html">Previous</a> | <a href="' . $this->verboseClassName . '-' . ($this->verboseId + 1) . '-' . $this->testId . '.html">Next</a>)<hr />' . $message;
-    $verbose_filename =  $this->verboseClassName . '-' . $this->verboseId . '-' . $this->testId . '.html';
+    $verbose_filename = $this->verboseClassName . '-' . $this->verboseId . '-' . $this->testId . '.html';
     if (file_put_contents($this->verboseDirectory . '/' . $verbose_filename, $message)) {
       $url = $this->verboseDirectoryUrl . '/' . $verbose_filename;
       // Not using \Drupal\Core\Utility\LinkGeneratorInterface::generate()
@@ -986,7 +1000,7 @@ abstract class TestBase {
 
     // Force assertion failures to be thrown as AssertionError for PHP 5 & 7
     // compatibility.
-    \Drupal\Component\Assertion\Handle::register();
+    Handle::register();
 
     set_error_handler(array($this, 'errorHandler'));
     // Iterate through all the methods in this class, unless a specific list of
@@ -1194,7 +1208,7 @@ abstract class TestBase {
     $this->originalConf = isset($GLOBALS['conf']) ? $GLOBALS['conf'] : NULL;
 
     // Backup statics and globals.
-    $this->originalContainer = clone \Drupal::getContainer();
+    $this->originalContainer = \Drupal::getContainer();
     $this->originalLanguage = $language_interface;
     $this->originalConfigDirectories = $GLOBALS['config_directories'];
 

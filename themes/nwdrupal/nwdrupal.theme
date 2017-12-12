@@ -7,11 +7,62 @@
 
 
 /**
- * Implements hook_preprocess_HOOK() for maintenance-page.html.twig.
+ * Implements hook_preprocess_HOOK()
  */
 function nwdrupal_preprocess_page(&$variables) {
 	
 	// Pass the current year in to the page template
 	$variables['date']['year'] = date('Y');
+}
 
+/**
+ * Implements hook_preprocess_HOOK()
+ */
+function nwdrupal_preprocess_node(&$variables) {
+
+  if ($variables['node']->getType() == 'event') {
+
+   // $date = $variables['node']->field_event_date->value();
+
+    if (!empty($variables['content']['field_event_rsvps'])) {
+      $count = $variables['content']['field_event_rsvps'][0]['#markup'];
+
+      if ($count == 1) {
+        $variables['content']['field_event_rsvps'][0]['#markup'] = t('1 RSVP');
+      }
+      else {
+        $variables['content']['field_event_rsvps'][0]['#markup'] = t('@count RSVPs', array('@count' => $count));
+      }
+    }
+
+    if (!empty($variables['content']['field_event_date'])) {
+      $timestamp = strtotime($variables['content']['field_event_date'][0]['#text']);
+      $variables['content']['nwdug_event_date']['week_day'] = date('D', $timestamp);
+      $variables['content']['nwdug_event_date']['day'] = date('j', $timestamp);
+      $variables['content']['nwdug_event_date']['month'] = date('M', $timestamp);
+      $variables['content']['nwdug_event_date']['year'] = date('Y', $timestamp);
+      $variables['content']['nwdug_event_date']['time'] = date('H:i', $timestamp);
+    }
+  }
+
+  if (isset($variables['view'])) {
+    // If we are looking at an event view then:
+    // - set an attribute so that we can alter any templates accordingly.
+    // - add a class to the first node.
+    if ($variables['node']->id() == $variables['view']->result[0]->_entity->id()) {
+      $variables['content']['first_entry'] = TRUE;
+      $variables['attributes']['class'][] = 'first-event';
+    }
+    if (isset($variables['view']->result[2])) {
+      if ($variables['node']->id() == $variables['view']->result[2]->_entity->id()) {
+        $variables['attributes']['class'][] = 'last-event';
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_theme_suggestions_hook_alter
+ */
+function nwdrupal_theme_suggestions_node_alter(&$suggestions, $variables) {
 }

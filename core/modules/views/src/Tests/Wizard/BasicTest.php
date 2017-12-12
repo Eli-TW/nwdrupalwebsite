@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Tests\Wizard\BasicTest.
- */
-
 namespace Drupal\views\Tests\Wizard;
 
 use Drupal\Component\Serialization\Json;
@@ -189,13 +184,16 @@ class BasicTest extends WizardTestBase {
     $this->drupalPostAjaxForm(NULL, array('show[wizard_key]' => 'users'), 'show[wizard_key]');
     $this->assertNoFieldByName('show[type]', NULL, 'The "of type" filter is not added for users.');
     $this->drupalPostAjaxForm(NULL, array('show[wizard_key]' => 'node'), 'show[wizard_key]');
-    $this->assertFieldByName('show[type]', 'all', 'The "of type" filter is added for nodes.');
+    $this->assertNoFieldByName('show[type]', 'all', 'The "of type" filter is not added for nodes when there are no node types.');
+    $this->drupalCreateContentType(array('type' => 'page'));
+    $this->drupalPostAjaxForm(NULL, array('show[wizard_key]' => 'node'), 'show[wizard_key]');
+    $this->assertFieldByName('show[type]', 'all', 'The "of type" filter is added for nodes when there is at least one node type.');
   }
 
   /**
    * Tests default plugin values are populated from the wizard form.
    *
-   * @see \Drupal\views\Plugin\views\display\DisplayPluginBase::mergeDefaults().
+   * @see \Drupal\views\Plugin\views\display\DisplayPluginBase::mergeDefaults()
    */
   public function testWizardDefaultValues() {
     $random_id = strtolower($this->randomMachineName(16));
@@ -209,7 +207,7 @@ class BasicTest extends WizardTestBase {
 
     // Make sure the plugin types that should not have empty options don't have.
     // Test against all values is unit tested.
-    // @see \Drupal\views\Tests\Plugin\DisplayKernelTest
+    // @see \Drupal\Tests\views\Kernel\Plugin\DisplayKernelTest
     $view = Views::getView($random_id);
     $displays = $view->storage->get('display');
 

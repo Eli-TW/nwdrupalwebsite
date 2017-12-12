@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Tests\Handler\FieldWebTest.
- */
-
 namespace Drupal\views\Tests\Handler;
 
 use Drupal\Component\Utility\Html;
@@ -53,7 +48,7 @@ class FieldWebTest extends HandlerTestBase {
   }
 
   /**
-   * Overrides \Drupal\views\Tests\ViewTestBase::viewsData().
+   * {@inheritdoc}
    */
   protected function viewsData() {
     $data = parent::viewsData();

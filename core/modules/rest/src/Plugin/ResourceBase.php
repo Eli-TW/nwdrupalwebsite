@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\rest\Plugin\ResourceBase.
- */
-
 namespace Drupal\rest\Plugin;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -93,7 +88,7 @@ abstract class ResourceBase extends PluginBase implements ContainerFactoryPlugin
   }
 
   /**
-   * Implements ResourceInterface::routes().
+   * {@inheritdoc}
    */
   public function routes() {
     $collection = new RouteCollection();
@@ -169,7 +164,7 @@ abstract class ResourceBase extends PluginBase implements ContainerFactoryPlugin
   }
 
   /**
-   * Implements ResourceInterface::availableMethods().
+   * {@inheritdoc}
    */
   public function availableMethods() {
     $methods = $this->requestMethods();

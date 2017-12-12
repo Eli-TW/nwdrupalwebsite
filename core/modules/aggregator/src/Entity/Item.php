@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\Entity\Item.
- */
-
 namespace Drupal\aggregator\Entity;
 
 use Drupal\Core\Cache\Cache;
@@ -42,7 +37,7 @@ use Drupal\Core\Url;
 class Item extends ContentEntityBase implements ItemInterface {
 
   /**
-   * Implements Drupal\Core\Entity\EntityInterface::label().
+   * {@inheritdoc}
    */
   public function label() {
     return $this->get('title')->value;
@@ -60,6 +55,7 @@ class Item extends ContentEntityBase implements ItemInterface {
 
     $fields['fid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Source feed'))
+      ->setRequired(TRUE)
       ->setDescription(t('The aggregator feed entity associated with this item.'))
       ->setSetting('target_type', 'aggregator_feed')
       ->setDisplayOptions('view', array(

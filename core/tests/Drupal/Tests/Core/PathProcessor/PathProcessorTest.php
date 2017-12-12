@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\PathProcessor\PathProcessorTest.
- */
-
 namespace Drupal\Tests\Core\PathProcessor;
 
 use Drupal\Core\Language\Language;
@@ -34,7 +29,7 @@ class PathProcessorTest extends UnitTestCase {
   protected $languages;
 
   /**
-   *  The language manager stub used to construct a PathProcessorLanguage object.
+   * The language manager stub used to construct a PathProcessorLanguage object.
    *
    * @var \Drupal\language\ConfigurableLanguageManagerInterface|\PHPUnit_Framework_MockObject_MockBuilder
    */
@@ -150,11 +145,16 @@ class PathProcessorTest extends UnitTestCase {
     $current_user = $this->getMockBuilder('Drupal\Core\Session\AccountInterface')
       ->getMock();
 
+    // Create a config event subscriber stub.
+    $config_subscriber = $this->getMockBuilder('Drupal\language\EventSubscriber\ConfigSubscriber')
+      ->disableOriginalConstructor()
+      ->getMock();
+
     // Create the processors.
     $alias_processor = new PathProcessorAlias($alias_manager);
     $decode_processor = new PathProcessorDecode();
     $front_processor = new PathProcessorFront($config_factory_stub);
-    $language_processor = new PathProcessorLanguage($config_factory_stub, $this->languageManager, $negotiator, $current_user);
+    $language_processor = new PathProcessorLanguage($config_factory_stub, $this->languageManager, $negotiator, $current_user, $config_subscriber);
 
     // First, test the processor manager with the processors in the incorrect
     // order. The alias processor will run before the language processor, meaning
@@ -209,4 +209,5 @@ class PathProcessorTest extends UnitTestCase {
     $processed = $processor_manager->processInbound($test_path, $request);
     $this->assertEquals('/user/1', $processed, 'Processing in the correct order resolves the system path from an alias.');
   }
+
 }

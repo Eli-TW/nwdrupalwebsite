@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\Controller\CommentController.
- */
-
 namespace Drupal\comment\Controller;
 
 use Drupal\comment\CommentInterface;
@@ -113,11 +108,11 @@ class CommentController extends ControllerBase {
    * @param \Drupal\comment\CommentInterface $comment
    *   A comment entity.
    *
-   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-   * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
-   *
    * @return \Symfony\Component\HttpFoundation\Response
    *   The comment listing set to the page on which the comment appears.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
    */
   public function commentPermalink(Request $request, CommentInterface $comment) {
     if ($entity = $comment->getCommentedEntity()) {
@@ -137,7 +132,6 @@ class CommentController extends ControllerBase {
       if ($session = $request->getSession()) {
         $redirect_request->setSession($session);
       }
-      // @todo: Convert the pager to use the request object.
       $request->query->set('page', $page);
       $response = $this->httpKernel->handle($redirect_request, HttpKernelInterface::SUB_REQUEST);
       if ($response instanceof CacheableResponseInterface) {
@@ -172,10 +166,10 @@ class CommentController extends ControllerBase {
    * @param \Drupal\Core\Entity\EntityInterface $node
    *   The node object identified by the legacy URL.
    *
-   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-   *
    * @return \Symfony\Component\HttpFoundation\RedirectResponse
    *   Redirects user to new url.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    */
   public function redirectNode(EntityInterface $node) {
     $fields = $this->commentManager->getFields('node');
@@ -208,17 +202,17 @@ class CommentController extends ControllerBase {
    *   (optional) Some comments are replies to other comments. In those cases,
    *   $pid is the parent comment's comment ID. Defaults to NULL.
    *
-   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
    *   An associative array containing:
    *   - An array for rendering the entity or parent comment.
    *     - comment_entity: If the comment is a reply to the entity.
    *     - comment_parent: If the comment is a reply to another comment.
    *   - comment_form: The comment form as a renderable array.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    */
   public function getReplyForm(Request $request, EntityInterface $entity, $field_name, $pid = NULL) {
     $account = $this->currentUser();
-    $uri = $entity->urlInfo()->setAbsolute();
     $build = array();
 
     // The user is not just previewing a comment.
@@ -270,9 +264,10 @@ class CommentController extends ControllerBase {
    *   (optional) Some comments are replies to other comments. In those cases,
    *   $pid is the parent comment's comment ID. Defaults to NULL.
    *
-   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    * @return \Drupal\Core\Access\AccessResultInterface
    *   An access result
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    */
   public function replyFormAccess(EntityInterface $entity, $field_name, $pid = NULL) {
     // Check if entity and field exists.
@@ -288,7 +283,7 @@ class CommentController extends ControllerBase {
 
     $status = $entity->{$field_name}->status;
     $access = $access->andIf(AccessResult::allowedIf($status == CommentItemInterface::OPEN)
-      ->cacheUntilEntityChanges($entity));
+      ->addCacheableDependency($entity));
 
     // $pid indicates that this is a reply to a comment.
     if ($pid) {
@@ -300,7 +295,7 @@ class CommentController extends ControllerBase {
       // Check if the parent comment is published and belongs to the entity.
       $access = $access->andIf(AccessResult::allowedIf($comment && $comment->isPublished() && $comment->getCommentedEntityId() == $entity->id()));
       if ($comment) {
-        $access->cacheUntilEntityChanges($comment);
+        $access->addCacheableDependency($comment);
       }
     }
     return $access;
@@ -312,10 +307,11 @@ class CommentController extends ControllerBase {
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request of the page.
    *
-   * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
-   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    *   The JSON response.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    */
   public function renderNewCommentsNodeLinks(Request $request) {
     if ($this->currentUser()->isAnonymous()) {

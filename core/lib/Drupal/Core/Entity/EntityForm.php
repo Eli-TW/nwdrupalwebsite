@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityForm.
- */
-
 namespace Drupal\Core\Entity;
 
 use Drupal\Core\Form\FormBase;
@@ -41,8 +36,17 @@ class EntityForm extends FormBase implements EntityFormInterface {
    * The entity manager.
    *
    * @var \Drupal\Core\Entity\EntityManagerInterface
+   *
+   * @deprecated in Drupal 8.0.0, will be removed before Drupal 9.0.0.
    */
   protected $entityManager;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
 
   /**
    * The entity being used by this form.
@@ -349,7 +353,19 @@ class EntityForm extends FormBase implements EntityFormInterface {
       $entity = $route_match->getParameter($entity_type_id);
     }
     else {
-      $entity = $this->entityManager->getStorage($entity_type_id)->create([]);
+      $values = [];
+      // If the entity has bundles, fetch it from the route match.
+      $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+      if ($bundle_key = $entity_type->getKey('bundle')) {
+        if (($bundle_entity_type_id = $entity_type->getBundleEntityType()) && $route_match->getRawParameter($bundle_entity_type_id)) {
+          $values[$bundle_key] = $route_match->getParameter($bundle_entity_type_id)->id();
+        }
+        elseif ($route_match->getRawParameter($bundle_key)) {
+          $values[$bundle_key] = $route_match->getParameter($bundle_key);
+        }
+      }
+
+      $entity = $this->entityTypeManager->getStorage($entity_type_id)->create($values);
     }
 
     return $entity;
@@ -401,6 +417,14 @@ class EntityForm extends FormBase implements EntityFormInterface {
    */
   public function setEntityManager(EntityManagerInterface $entity_manager) {
     $this->entityManager = $entity_manager;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setEntityTypeManager(EntityTypeManagerInterface $entity_type_manager) {
+    $this->entityTypeManager = $entity_type_manager;
     return $this;
   }
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\FieldItemInterface.
- */
-
 namespace Drupal\Core\Field;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -103,7 +98,7 @@ interface FieldItemInterface extends ComplexDataInterface {
   /**
    * Gets the langcode of the field values held in the object.
    *
-   * @return $langcode
+   * @return string
    *   The langcode.
    */
   public function getLangcode();
@@ -122,11 +117,11 @@ interface FieldItemInterface extends ComplexDataInterface {
    * @param $property_name
    *   The name of the property to get; e.g., 'title' or 'name'.
    *
-   * @throws \InvalidArgumentException
-   *   If a not existing property is accessed.
-   *
    * @return \Drupal\Core\TypedData\TypedDataInterface
    *   The property object.
+   *
+   * @throws \InvalidArgumentException
+   *   If a not existing property is accessed.
    */
   public function __get($property_name);
 

@@ -1,15 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Asset\LibraryDiscoveryIntegrationTest.
- */
-
 namespace Drupal\system\Tests\Asset;
 
 use Drupal\Core\Asset\Exception\InvalidLibrariesExtendSpecificationException;
 use Drupal\Core\Asset\Exception\InvalidLibrariesOverrideSpecificationException;
-use Drupal\simpletest\KernelTestBase;
+use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Tests the library discovery and library discovery parser.
@@ -36,11 +31,17 @@ class LibraryDiscoveryIntegrationTest extends KernelTestBase {
   }
 
   /**
-   * Ensures that the element info can be altered by themes.
+   * Tests that hook_library_info is invoked and the cache is cleared.
    */
-  public function testElementInfoByTheme() {
+  public function testHookLibraryInfoByTheme() {
+    // Activate test_theme and verify that the library 'kitten' is added using
+    // hook_library_info_alter().
     $this->activateTheme('test_theme');
     $this->assertTrue($this->libraryDiscovery->getLibraryByName('test_theme', 'kitten'));
+
+    // Now make classy the active theme and assert that library is not added.
+    $this->activateTheme('classy');
+    $this->assertFalse($this->libraryDiscovery->getLibraryByName('test_theme', 'kitten'));
   }
 
   /**

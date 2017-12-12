@@ -1,20 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\CommentStorageInterface.
- */
-
 namespace Drupal\comment;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\ContentEntityStorageInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 
 /**
  * Defines an interface for comment entity storage classes.
  */
-interface CommentStorageInterface extends EntityStorageInterface {
+interface CommentStorageInterface extends ContentEntityStorageInterface {
 
   /**
    * Gets the maximum encoded thread value for the top level comments.

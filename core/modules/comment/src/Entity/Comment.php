@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\Entity\Comment.
- */
-
 namespace Drupal\comment\Entity;
 
 use Drupal\Component\Utility\Number;
@@ -25,11 +20,12 @@ use Drupal\user\UserInterface;
  * @ContentEntityType(
  *   id = "comment",
  *   label = @Translation("Comment"),
- *   bundle_label = @Translation("Content type"),
+ *   bundle_label = @Translation("Comment type"),
  *   handlers = {
  *     "storage" = "Drupal\comment\CommentStorage",
  *     "storage_schema" = "Drupal\comment\CommentStorageSchema",
  *     "access" = "Drupal\comment\CommentAccessControlHandler",
+ *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
  *     "view_builder" = "Drupal\comment\CommentViewBuilder",
  *     "views_data" = "Drupal\comment\CommentViewsData",
  *     "form" = {
@@ -203,8 +199,7 @@ class Comment extends ContentEntityBase implements CommentInterface {
    * {@inheritdoc}
    */
   public function permalink() {
-    $entity = $this->getCommentedEntity();
-    $uri = $entity->urlInfo();
+    $uri = $this->urlInfo();
     $uri->setOption('fragment', 'comment-' . $this->id());
     return $uri;
   }

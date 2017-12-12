@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\Tests\CustomBooleanTest.
- */
-
 namespace Drupal\views_ui\Tests;
 
 use Drupal\Component\Utility\SafeMarkup;
@@ -35,7 +30,7 @@ class CustomBooleanTest extends UITestBase {
   }
 
   /**
-   * Overrides \Drupal\views\Tests\ViewTestBase::dataSet().
+   * {@inheritdoc}
    */
   public function dataSet() {
     $data = parent::dataSet();

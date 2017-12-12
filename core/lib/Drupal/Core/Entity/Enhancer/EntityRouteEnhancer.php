@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Enhancer\EntityRouteEnhancer.
- */
-
 namespace Drupal\Core\Entity\Enhancer;
 
 use Drupal\Core\Routing\Enhancer\RouteEnhancerInterface;
@@ -91,11 +86,11 @@ class EntityRouteEnhancer implements RouteEnhancerInterface {
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The Request instance.
    *
-   * @throws \RuntimeException
-   *   Thrown when an entity of a type cannot be found in a route.
-   *
    * @return array
    *   The modified defaults.
+   *
+   * @throws \RuntimeException
+   *   Thrown when an entity of a type cannot be found in a route.
    */
   protected function enhanceEntityView(array $defaults, Request $request) {
     $defaults['_controller'] = '\Drupal\Core\Entity\Controller\EntityViewController::view';

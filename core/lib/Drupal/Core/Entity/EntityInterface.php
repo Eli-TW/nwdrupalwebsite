@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityInterface.
- */
-
 namespace Drupal\Core\Entity;
 
 use Drupal\Core\Access\AccessibleInterface;
@@ -101,7 +96,29 @@ interface EntityInterface extends AccessibleInterface, CacheableDependencyInterf
   public function label();
 
   /**
-   * Gets the URI elements of the entity.
+   * Gets the URL object for the entity.
+   *
+   * @param string $rel
+   *   The link relationship type, for example: canonical or edit-form.
+   * @param array $options
+   *   See \Drupal\Core\Routing\UrlGeneratorInterface::generateFromRoute() for
+   *   the available options.
+   *
+   * @return \Drupal\Core\Url
+   *   The URL object.
+   *
+   * @deprecated in Drupal 8.0.0, intended to be removed in Drupal 9.0.0
+   *   Use \Drupal\Core\Entity\EntityInterface::toUrl() instead.
+   *
+   * @see \Drupal\Core\Entity\EntityInterface::toUrl
+   */
+  public function urlInfo($rel = 'canonical', array $options = array());
+
+  /**
+   * Gets the URL object for the entity.
+   *
+   * The entity must have an id already. Content entities usually get their IDs
+   * by saving them.
    *
    * URI templates might be set in the links array in an annotation, for
    * example:
@@ -128,8 +145,12 @@ interface EntityInterface extends AccessibleInterface, CacheableDependencyInterf
    *   the available options.
    *
    * @return \Drupal\Core\Url
+   *   The URL object.
+   *
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   * @throws \Drupal\Core\Entity\Exception\UndefinedLinkTemplateException
    */
-  public function urlInfo($rel = 'canonical', array $options = array());
+  public function toUrl($rel = 'canonical', array $options = array());
 
   /**
    * Gets the public URL for this entity.
@@ -142,8 +163,35 @@ interface EntityInterface extends AccessibleInterface, CacheableDependencyInterf
    *
    * @return string
    *   The URL for this entity.
+   *
+   * @deprecated in Drupal 8.0.0, intended to be removed in Drupal 9.0.0
+   *   Please use toUrl() instead.
+   *
+   * @see \Drupal\Core\Entity\EntityInterface::toUrl
    */
   public function url($rel = 'canonical', $options = array());
+
+  /**
+   * Deprecated way of generating a link to the entity. See toLink().
+   *
+   * @param string|null $text
+   *   (optional) The link text for the anchor tag as a translated string.
+   *   If NULL, it will use the entity's label. Defaults to NULL.
+   * @param string $rel
+   *   (optional) The link relationship type. Defaults to 'canonical'.
+   * @param array $options
+   *   See \Drupal\Core\Routing\UrlGeneratorInterface::generateFromRoute() for
+   *   the available options.
+   *
+   * @return string
+   *   An HTML string containing a link to the entity.
+   *
+   * @deprecated in Drupal 8.0.0, intended to be removed in Drupal 9.0.0
+   *   Please use toLink() instead.
+   *
+   * @see \Drupal\Core\Entity\EntityInterface::toLink
+   */
+  public function link($text = NULL, $rel = 'canonical', array $options = []);
 
   /**
    * Generates the HTML for a link to this entity.
@@ -157,10 +205,13 @@ interface EntityInterface extends AccessibleInterface, CacheableDependencyInterf
    *   See \Drupal\Core\Routing\UrlGeneratorInterface::generateFromRoute() for
    *   the available options.
    *
-   * @return string
-   *   An HTML string containing a link to the entity.
+   * @return \Drupal\Core\Link
+   *   A Link to the entity.
+   *
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   * @throws \Drupal\Core\Entity\Exception\UndefinedLinkTemplateException
    */
-  public function link($text = NULL, $rel = 'canonical', array $options = []);
+  public function toLink($text = NULL, $rel = 'canonical', array $options = []);
 
   /**
    * Indicates if a link template exists for a given key.
@@ -253,6 +304,9 @@ interface EntityInterface extends AccessibleInterface, CacheableDependencyInterf
    *   The entity storage object.
    *
    * @see \Drupal\Core\Field\FieldItemListInterface::preSave()
+   *
+   * @throws \Exception
+   *   When there is a problem that should prevent saving the entity.
    */
   public function preSave(EntityStorageInterface $storage);
 
@@ -285,10 +339,17 @@ interface EntityInterface extends AccessibleInterface, CacheableDependencyInterf
   public static function preCreate(EntityStorageInterface $storage, array &$values);
 
   /**
-   * Acts on an entity after it is created but before hooks are invoked.
+   * Acts on a created entity before hooks are invoked.
+   *
+   * Used after the entity is created, but before saving the entity and before
+   * any of the presave hooks are invoked.
+   *
+   * See the @link entity_crud Entity CRUD topic @endlink for more information.
    *
    * @param \Drupal\Core\Entity\EntityStorageInterface $storage
    *   The entity storage object.
+   *
+   * @see \Drupal\Core\Entity\EntityInterface::create()
    */
   public function postCreate(EntityStorageInterface $storage);
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Updater\Theme.
- */
-
 namespace Drupal\Core\Updater;
 
 use Drupal\Core\Url;
@@ -49,7 +44,7 @@ class Theme extends Updater implements UpdaterInterface {
   }
 
   /**
-   * Implements Drupal\Core\Updater\UpdaterInterface::isInstalled().
+   * {@inheritdoc}
    */
   public function isInstalled() {
     // Check if the theme exists in the file system, regardless of whether it
@@ -59,7 +54,7 @@ class Theme extends Updater implements UpdaterInterface {
   }
 
   /**
-   * Implements Drupal\Core\Updater\UpdaterInterface::canUpdateDirectory().
+   * {@inheritdoc}
    */
   static function canUpdateDirectory($directory) {
     $info = static::getExtensionInfo($directory);
@@ -80,7 +75,7 @@ class Theme extends Updater implements UpdaterInterface {
   }
 
   /**
-   * Overrides Drupal\Core\Updater\Updater::postInstall().
+   * {@inheritdoc}
    */
   public function postInstall() {
     // Update the theme info.
@@ -89,7 +84,7 @@ class Theme extends Updater implements UpdaterInterface {
   }
 
   /**
-   * Overrides Drupal\Core\Updater\Updater::postInstallTasks().
+   * {@inheritdoc}
    */
   public function postInstallTasks() {
     // Since this is being called outsite of the primary front controller,
@@ -114,4 +109,5 @@ class Theme extends Updater implements UpdaterInterface {
       ],
     ];
   }
+
 }

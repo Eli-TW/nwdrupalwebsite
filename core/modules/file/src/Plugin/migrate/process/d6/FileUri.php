@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\file\Plugin\migrate\process\d6\FileUri.
- */
-
 namespace Drupal\file\Plugin\migrate\process\d6;
 
 use Drupal\migrate\MigrateExecutableInterface;
@@ -24,6 +19,11 @@ class FileUri extends ProcessPluginBase {
    * {@inheritdoc}
    */
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
+    // If we're stubbing a file entity, return a uri of NULL so it will get
+    // stubbed by the general process.
+    if ($row->isStub()) {
+      return NULL;
+    }
     list($filepath, $file_directory_path, $temp_directory_path, $is_public) = $value;
 
     // Specific handling using $temp_directory_path for temporary files.

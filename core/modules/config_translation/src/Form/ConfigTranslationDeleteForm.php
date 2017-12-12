@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config_translation\Form\ConfigTranslationDeleteForm.
- */
-
 namespace Drupal\config_translation\Form;
 
 use Drupal\config_translation\ConfigMapperManagerInterface;
@@ -141,7 +136,7 @@ class ConfigTranslationDeleteForm extends ConfirmFormBase {
 
     // Flush all persistent caches.
     $this->moduleHandler->invokeAll('cache_flush');
-    foreach (Cache::getBins() as $service_id => $cache_backend) {
+    foreach (Cache::getBins() as $cache_backend) {
       $cache_backend->deleteAll();
     }
 

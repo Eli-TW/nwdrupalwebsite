@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\Schema\ArrayElement.
- */
-
 namespace Drupal\Core\Config\Schema;
 
 /**
@@ -115,7 +110,7 @@ abstract class ArrayElement extends Element implements \IteratorAggregate, Typed
   }
 
   /**
-   * Implements IteratorAggregate::getIterator();
+   * {@inheritdoc}
    */
   public function getIterator() {
     return new \ArrayIterator($this->getElements());

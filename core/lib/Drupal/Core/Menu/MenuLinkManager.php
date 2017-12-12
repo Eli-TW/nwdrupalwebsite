@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Menu\MenuLinkManager.
- */
-
 namespace Drupal\Core\Menu;
 
 use Drupal\Component\Plugin\Exception\PluginException;
@@ -351,8 +346,11 @@ class MenuLinkManager implements MenuLinkManagerInterface {
    * {@inheritdoc}
    */
   public function addDefinition($id, array $definition) {
-    if ($this->treeStorage->load($id) || $id === '') {
-      throw new PluginException("The ID $id already exists as a plugin definition or is not valid");
+    if ($this->treeStorage->load($id)) {
+      throw new PluginException("The menu link ID $id already exists as a plugin definition");
+    }
+    elseif ($id === '') {
+      throw new PluginException("The menu link ID cannot be empty");
     }
     // Add defaults, so there is no requirement to specify everything.
     $this->processDefinition($definition, $id);

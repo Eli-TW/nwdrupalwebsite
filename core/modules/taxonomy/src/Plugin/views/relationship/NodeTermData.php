@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\Plugin\views\relationship\NodeTermData.
- */
-
 namespace Drupal\taxonomy\Plugin\views\relationship;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -21,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @ViewsRelationship("node_term_data")
  */
-class NodeTermData extends RelationshipPluginBase  {
+class NodeTermData extends RelationshipPluginBase {
 
   /**
    * The vocabulary storage.
@@ -60,7 +55,7 @@ class NodeTermData extends RelationshipPluginBase  {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\relationship\RelationshipPluginBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);

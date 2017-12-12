@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\Plugin\views\field\TaxonomyIndexTid.
- */
-
 namespace Drupal\taxonomy\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -60,7 +55,7 @@ class TaxonomyIndexTid extends PrerenderList {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\field\PrerenderList::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
